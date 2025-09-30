@@ -140,19 +140,50 @@
 </div>
 </div>
 </div>
-<div class="lg:col-span-2 space-y-8">
-        <section id="map-view" style="border: 2px solid #ccc; padding: 1rem; margin-top: 2rem;">
-  <h2 style="text-align: center;">Isle of Man Map View</h2>
-  <iframe
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d19462.13632884594!2d-4.495!3d54.236!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4863e0b9e6e3e3e3%3A0x3e3e3e3e3e3e3e3e!2sIsle%20of%20Man!5e0!3m2!1sen!2suk!4v1696100000000!5m2!1sen!2suk"
-    width="100%"
-    height="450"
-    style="border:0;"
-    allowfullscreen=""
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade">
-  </iframe>
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- Interactive Wind Map -->
+<section id="map-view" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+  <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Wind Direction Map</h2>
+  <div id="wind-map" style="height: 450px; border-radius: 12px;"></div>
 </section>
+
+<script>
+// Initialize Leaflet map
+const map = L.map('wind-map').setView([54.236, -4.495], 10);
+
+// Add OpenStreetMap tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Example wind direction (replace with live data)
+const windDirection = 'SW'; // Options: '1', 'NW', 'SW', 'W'
+
+// Define marker positions
+const markers = {
+   'N': { lat: 54.25, lng: -4.48, label: 'North Wind' },
+  'NE': { lat: 54.28, lng: -4.50, label: 'Northeast Wind' },
+   'E': { lat: 54.22, lng: -4.47, label: 'Eastly Wind' },
+  'SE': { lat: 54.22, lng: -4.37, label: 'Southeast Wind' },
+   'S': { lat: 54.22, lng: -4.33, label: 'South Wind' },
+  'SW': { lat: 54.30, lng: -4.47, label: 'Southwest Wind' },
+   'W': { lat: 54.20, lng: -4.52, label: 'Westly Wind' },
+  'NW': { lat: 54.10, lng: -4.50, label: 'Northwest Wind' }
+
+
+};
+
+// Add selected marker
+if (markers[windDirection]) {
+  const { lat, lng, label } = markers[windDirection];
+  L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
+} else {
+  console.warn('No marker defined for wind direction:', windDirection);
+}
+</script>
 </div>
 <div class="mt-6 flex-grow flex flex-col justify-end">
 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Wind Forecast</h3>
