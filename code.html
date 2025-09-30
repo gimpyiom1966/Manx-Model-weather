@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pauls Model Guider - Isle of Man Weather</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#E57A44", // Deep Orange
+                        "background-light": "#FDFBF7",
+                        "background-dark": "#2a2b30", // Dark Slate Gray
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#333940", // Darker Slate
+                        "accent-red": "#C94C4C", // Muted Red
+                        "text-light": "#333333", // Dark Gray
+                        "text-dark": "#EFEAE4", // Light Gray
+                        "text-muted-light": "#666666", // Medium Gray
+                        "text-muted-dark": "#AAAAAA", // Lighter Gray
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .compass-dial {
+            transform: rotate(var(--wind-direction, 0deg));
+        }
+        .chart-container {
+            width: 100%;
+            height: 250px; /* Default height for smaller screens */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+<div class="flex flex-col min-h-screen">
+<header class="bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl">cyclone</span>
+<h1 class="text-xl font-bold text-gray-900 dark:text-white">Pauls Model Guider</h1>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">Forecast</a>
+<a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">Radar</a>
+<a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">Observations</a>
+</nav>
+<div class="flex items-center">
+<button class="md:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+<div class="lg:col-span-3 space-y-8">
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+<div class="flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-primary text-5xl mb-3">air</span>
+<p class="text-base font-semibold text-gray-900 dark:text-white">Wind Speed</p>
+<p class="text-3xl font-bold text-primary">15 <span class="text-xl font-normal">mph</span></p>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Gusts: 25 mph</p>
+</div>
+<div class="flex flex-col items-center justify-center p-4 text-center">
+<div class="relative w-32 h-32">
+<div class="absolute inset-0 border-4 border-gray-300 dark:border-gray-700 rounded-full flex items-center justify-center">
+<div class="compass-dial w-full h-full flex items-center justify-center" style="--wind-direction: 225deg;">
+<span class="material-symbols-outlined text-primary text-6xl transform -rotate-45">navigation</span>
+</div>
+</div>
+</div>
+<p class="text-base font-semibold text-gray-900 dark:text-white mt-3">Wind Direction</p>
+<p class="text-2xl font-bold text-primary">SW</p>
+</div>
+<div class="flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-primary text-5xl mb-3">device_thermostat</span>
+<p class="text-base font-semibold text-gray-900 dark:text-white">Temperature</p>
+<p class="text-3xl font-bold text-primary">12°C</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="material-symbols-outlined text-primary/80 text-2xl">humidity_percentage</span>
+<p class="text-base font-semibold text-gray-900 dark:text-white">Humidity: 75%</p>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm">
+<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Wind Speed & Gusts Forecast</h2>
+<div class="chart-container">
+<canvas id="windSpeedChart"></canvas>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm">
+<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Temperature Trend</h2>
+<div class="chart-container">
+<canvas id="temperatureChart"></canvas>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm lg:col-span-3">
+<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Live Weather Radar</h2>
+<div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden h-[30vh] md:h-[50vh]">
+<iframe class="w-full h-full" frameborder="0" src="https://embed.windy.com/embed2.html?lat=54.236&amp;lon=-4.548&amp;zoom=8&amp;level=surface&amp;overlay=wind&amp;menu=&amp;message=true&amp;marker=&amp;calendar=now&amp;pressure=true&amp;type=map&amp;location=coordinates&amp;detail=true&amp;metricWind=mph&amp;metricTemp=%C2%B0C&amp;radarRange=-1">
+</iframe>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2 space-y-8">
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700/50 h-full flex flex-col justify-center">
+<h2 class="text-3xl font-bold mb-6 text-primary text-center tracking-wide">FLYING SITE STATUS</h2>
+<div class="aspect-w-16 aspect-h-9 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700">
+<img alt="Isle of Man Map with Site Markers" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfx_9bV_q8w1jAUUCt1jtlHWANQcD_nfHDrQCn2yESTXRC7O7ZVq2Oucrdjin3s2Qv_kcGxrbbKY2y7epsMX3FKs1Vpto7KEMdJ31FXvv4JlQZuDXOi2Up0cuYCTFZ85C7GY-L3FyUxwcqRVMFI7DYrzZUaAeHF-Ha3h4cKrE-xEzVQ2gLomYqV5zTVnPIH5hnEyY5jBmq19s3D3h_7HN2UmjZeq9WdKwjKBl6_CSXTZuopEDDiGoX_1dLtuJ3ciZgWG4a6oIAMTzP"/>
+</div>
+<div class="mt-6 text-center">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Current Conditions Summary</h3>
+<div class="grid grid-cols-2 gap-4 text-left px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">air</span>
+<div>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark">Wind</p>
+<p class="font-bold text-gray-900 dark:text-white">15 mph SW</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">device_thermostat</span>
+<div>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark">Temp</p>
+<p class="font-bold text-gray-900 dark:text-white">12°C</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">water_drop</span>
+<div>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark">Humidity</p>
+<p class="font-bold text-gray-900 dark:text-white">75%</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">visibility</span>
+<div>
+<p class="text-sm text-text-muted-light dark:text-text-muted-dark">Visibility</p>
+<p class="font-bold text-gray-900 dark:text-white">10 km</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-background-light dark:bg-background-dark mt-8 border-t border-gray-200 dark:border-gray-800">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
+<p>© 2024 Pauls Model Guider. All rights reserved.</p>
+</div>
+</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Sample Data for Charts (Replace with actual data fetching if needed)
+    const windSpeedLabels = ['Now', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM'];
+    const windSpeedData = [15, 16, 15, 14, 12, 10];
+    const windGustsData = [25, 26, 25, 23, 20, 18];
+
+    const temperatureLabels = ['Morning', 'Noon', 'Afternoon', 'Evening'];
+    const temperatureData = [10, 12, 11, 9];
+
+    // Wind Speed Chart
+    const windSpeedCtx = document.getElementById('windSpeedChart').getContext('2d');
+    new Chart(windSpeedCtx, {
+        type: 'line',
+        data: {
+            labels: windSpeedLabels,
+            datasets: [{
+                label: 'Wind Speed (mph)',
+                data: windSpeedData,
+                borderColor: 'rgb(229, 122, 68)', // Primary color
+                backgroundColor: 'rgba(229, 122, 68, 0.2)',
+                fill: true,
+                tension: 0.4
+            }, {
+                label: 'Gusts (mph)',
+                data: windGustsData,
+                borderColor: 'rgba(201, 76, 76, 0.8)', // Accent Red
+                backgroundColor: 'rgba(201, 76, 76, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderDash: [5, 5]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-light-color-from-css') || '#333333'
+                    }
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted-light-color-from-css') || '#666666'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted-light-color-from-css') || '#666666'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Temperature Chart
+    const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
+    new Chart(temperatureCtx, {
+        type: 'bar',
+        data: {
+            labels: temperatureLabels,
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: temperatureData,
+                backgroundColor: 'rgba(229, 122, 68, 0.6)', // Primary color
+                borderColor: 'rgb(229, 122, 68)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted-light-color-from-css') || '#666666'
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted-light-color-from-css') || '#666666'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Function to dynamically get Tailwind CSS variables for chart colors (example)
+    function getTailwindColor(colorName, opacity = 1) {
+        const rootStyles = getComputedStyle(document.documentElement);
+        let colorValue = rootStyles.getPropertyValue(`--${colorName}`).trim();
+        if (!colorValue) {
+            console.warn(`Tailwind color variable --${colorName} not found.`);
+            return `rgba(128, 128, 128, ${opacity})`; // Default gray
+        }
+        // Basic hex to rgb conversion if needed
+        if (colorValue.startsWith('#')) {
+            let r = parseInt(colorValue.slice(1, 3), 16),
+                g = parseInt(colorValue.slice(3, 5), 16),
+                b = parseInt(colorValue.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+        return `${colorValue.replace(')', `, ${opacity})`)}`;
+    }
+
+    // Example of using the function (though Chart.js often uses its own rgba)
+    // const primaryColor = getTailwindColor('primary', 0.7);
+
+</script>
+</body>
+</html>
