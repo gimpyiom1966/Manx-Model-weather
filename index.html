@@ -145,14 +145,14 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <!-- Interactive Wind Map -->
-<section id="map-view" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-  <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Wind Direction Map</h2>
-  <div id="wind-map" style="height: 850px; border-radius: 12px;"></div>
+<section id="wind-map-section" class="w-full max-w-screen-xl mx-auto p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
+  <h2 class="text-3xl font-bold mb-4 text-primary text-center">Wind Direction Map</h2>
+  <div id="wind-map" class="h-[500px] w-full rounded-lg border border-cyan-400 shadow-md"></div>
 </section>
         
  <!-- google map street view --!>      
-<section class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-  <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Street View: Windy Corner</h2>
+<section id="street-view" class="w-full max-w-screen-xl mx-auto mt-8 p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
+  <h2 class="text-3xl font-bold mb-4 text-primary text-center">Street View: Windy Corner</h2>
   <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-inner">
     <iframe 
       src="https://www.google.com/maps/embed?pb=!4v1759433622593!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469" 
@@ -165,6 +165,7 @@
     </iframe>
   </div>
 </section>
+
 
 <script>
 // Initialize Leaflet map
