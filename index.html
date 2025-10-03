@@ -145,12 +145,10 @@
 <!-- Interactive Wind Map -->
 <div class="lg:col-span-2 space-y-8">
 <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 h-full flex flex-col">        
-<div class="aspect-w-16 aspect-h-9 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
-        <section id="wind-map-section" class="w-full max-w-screen-xl mx-auto p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
-  <h2 class="text-3xl font-bold mb-4 text-primary text-center">Wind Direction Map</h2>
-  <div id="wind-map" class="h-[500px] w-full rounded-lg border border-cyan-400 shadow-md"></div>
-</section>
- </div>       
+<h2 class="text-3xl font-bold mb-4 text-primary text-center">Wind Direction Map6</h2>
+<div class="aspect-w-16 aspect-h-9 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">      
+<div id="wind-map" class="h-[500px] w-full rounded-lg border border-cyan-400 shadow-md"></div>
+      
  <!-- google map street view --!>      
 <section id="street-view" class="w-full max-w-screen-xl mx-auto mt-8 p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
   <h2 class="text-3xl font-bold mb-4 text-primary text-center">Street View: Windy Corner</h2>
@@ -171,15 +169,15 @@
 <script>
 // Initialize Leaflet map
 const map = L.map('wind-map').setView([54.236, -4.495], 10);
-</div>
+
 // Add OpenStreetMap tiles
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
-</div>
+
 // Example wind direction (replace with live data)
 const windDirection = 'NE'; // Options: '1', 'NW', 'SW', 'W'
-</div>
+
 // Define marker positions
 const markers = {
    'N': { lat: 54.24, lng: -4.48, label: 'North Wind' },// Bandy Well Rd or Beinn-y-Phott
