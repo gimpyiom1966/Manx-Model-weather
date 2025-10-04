@@ -169,7 +169,7 @@
         
 <script>
 // Initialize Leaflet map
-const map = L.map('wind-map').setView([54.236, -4.495], 10);
+const map = L.map('wind-map').setView([54.236, -4.495], 10); // show Islee Of Man
 
 // Add OpenStreetMap tiles
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -198,6 +198,7 @@ if (markers[windDirection]) {
 } else {
   console.warn('No marker defined for wind direction:', windDirection);
 }
+        
 // Generate Street View URL
 
  const streetViewPanoids = {
