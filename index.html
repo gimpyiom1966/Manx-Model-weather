@@ -181,24 +181,32 @@ if (markers[windDirection]) {
 } else {
   console.warn('No marker defined for wind direction:', windDirection);
 }
+  // Generate Street View URL
+  function getStreetViewURL(lat, lng) {
+    return `https://www.google.com/maps/embed?pb=!4v1759433622593!6m8!1m7!1sCAoSLEFGMVFpcE1vZ0ZzZ2Z1Z3ZzZ3ZzZ3ZzZ3ZzZ3ZzZ3Zz!2m2!1d${lat}!2d${lng}!3f75!4f0!5f0.7820865974627469`;
+  }
+
+  // Update iframe based on wind direction
+  const streetFrame = document.getElementById("streetFrame");
+  if (markers[windDirection]) {
+    const { lat, lng, label } = markers[windDirection];
+    streetFrame.src = getStreetViewURL(lat, lng);
+  } else {
+    console.warn("No Street View location for wind direction:", windDirection);
+  }
 </script>
 
  <!-- google map street view --!>      
 <section id="street-view" class="w-full max-w-screen-xl mx-auto mt-8 p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
   <h2 class="text-3xl font-bold mb-4 text-primary text-center">Street View: Windy Corner</h2>
   <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-inner">
-    <iframe 
-      src="https://www.google.com/maps/embed?pb=!4v1759433622593!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469" 
-      width="100%" 
-      height="450" 
-      style="border:0;" 
-      allowfullscreen 
-      loading="lazy" 
+    <iframe id="streetFrame"
+      width="100%" height="450" style="border:0;" allowfullscreen loading="lazy"
       referrerpolicy="no-referrer-when-downgrade">
     </iframe>
   </div>
- </div>       
 </section>
+        
 
 <!-- Wind Forcast section--!>
 <section class="mt-6 flex-grow flex flex-col justify-end">
