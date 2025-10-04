@@ -210,14 +210,14 @@ if (markers[windDirection]) {
 function getStreetViewEmbed(panoid) {
   return `https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!${panoid}!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469`;
 }
-const windDirection = 'SW'; // Replace with live data
+const windDirection1 = 'W'; // Replace with live data
 const streetFrame = document.getElementById("streetFrame");
 
-if (streetViewPanoids[windDirection]) {
-  const panoid = streetViewPanoids[windDirection];
+if (streetViewPanoids[windDirection1]) {
+  const panoid = streetViewPanoids[windDirection1];
   streetFrame.src = getStreetViewEmbed(panoid);
 } else {
-  console.warn("No Street View panoid for wind direction:", windDirection);
+  console.warn("No Street View panoid for wind direction:", windDirection1);
 }
 </script>
 
