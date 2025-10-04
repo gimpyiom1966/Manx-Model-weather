@@ -167,6 +167,55 @@
 </section>
 
         
+
+
+<!-- Wind Forcast section--!>
+<section class="mt-6 flex-grow flex flex-col justify-end">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Wind Forecast</h3>
+<div class="space-y-2">
+<div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary shadow-sm">
+<span class="font-medium text-text-light dark:text-text-dark">Now (2 PM)</span>
+<div class="flex items-center gap-3 justify-end">
+<span class="material-symbols-outlined text-primary text-2xl weather-icon-spin">air</span>
+<span class="font-bold text-gray-900 dark:text-white text-lg">15 mph SW</span>
+</div>
+</div>
+<div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary/80 shadow-sm">
+<span class="font-medium text-text-muted-light dark:text-text-muted-dark">3 PM</span>
+<div class="flex items-center gap-3 justify-end">
+<span class="material-symbols-outlined text-primary/80 text-2xl">air</span>
+<span class="font-bold text-text-light dark:text-text-dark/90 text-lg">14 mph SW</span>
+</div>
+</div>
+<div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary/60 shadow-sm">
+<span class="font-medium text-text-muted-light dark:text-text-muted-dark">4 PM</span>
+<div class="flex items-center gap-3 justify-end">
+<span class="material-symbols-outlined text-primary/60 text-2xl">air</span>
+<span class="font-bold text-text-light dark:text-text-dark/80 text-lg">12 mph WSW</span>
+</div>
+</div>
+<div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary/40 shadow-sm">
+<span class="font-medium text-text-muted-light dark:text-text-muted-dark">5 PM</span>
+<div class="flex items-center gap-3 justify-end">
+<span class="material-symbols-outlined text-primary/40 text-2xl">air</span>
+<span class="font-bold text-text-light dark:text-text-dark/70 text-lg">10 mph W</span>
+</section>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main></div>
+<footer class="bg-background-light dark:bg-background-dark mt-8 border-t border-gray-300 dark:border-gray-700">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
+<p>© 2025 Pauls Model Glider. All rights reserved.</p>
+</div>
+</footer>
+
+</body></html>
+
+<!-- ✅ JavaScript logic -->
 <script>
 // Initialize Leaflet map
 const map = L.map('wind-map').setView([54.236, -4.495], 10); // show Islee Of Man
@@ -214,7 +263,15 @@ const streetViewEmbeds = {
 };
           
 const windDirection1 = 'W'; // Replace with live data
+        
 const streetFrame = document.getElementById("streetFrame");
+        if (markers[windDirection]) {
+  const { label } = markers[windDirection];
+  const streetLabel = document.getElementById("streetLabel");
+  if (streetLabel) {
+    streetLabel.textContent = `Street View: ${label}`;
+  }
+}
 
 if (streetViewEmbeds[windDirection1]) {
   streetFrame.src = streetViewEmbeds[windDirection1];
@@ -222,50 +279,4 @@ if (streetViewEmbeds[windDirection1]) {
   console.warn("No Street View embed for wind direction:", windDirection1);
 }
 
-</script>
-
-<!-- Wind Forcast section--!>
-<section class="mt-6 flex-grow flex flex-col justify-end">
-<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Wind Forecast</h3>
-<div class="space-y-2">
-<div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary shadow-sm">
-<span class="font-medium text-text-light dark:text-text-dark">Now (2 PM)</span>
-<div class="flex items-center gap-3 justify-end">
-<span class="material-symbols-outlined text-primary text-2xl weather-icon-spin">air</span>
-<span class="font-bold text-gray-900 dark:text-white text-lg">15 mph SW</span>
-</div>
-</div>
-<div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary/80 shadow-sm">
-<span class="font-medium text-text-muted-light dark:text-text-muted-dark">3 PM</span>
-<div class="flex items-center gap-3 justify-end">
-<span class="material-symbols-outlined text-primary/80 text-2xl">air</span>
-<span class="font-bold text-text-light dark:text-text-dark/90 text-lg">14 mph SW</span>
-</div>
-</div>
-<div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary/60 shadow-sm">
-<span class="font-medium text-text-muted-light dark:text-text-muted-dark">4 PM</span>
-<div class="flex items-center gap-3 justify-end">
-<span class="material-symbols-outlined text-primary/60 text-2xl">air</span>
-<span class="font-bold text-text-light dark:text-text-dark/80 text-lg">12 mph WSW</span>
-</div>
-</div>
-<div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary/40 shadow-sm">
-<span class="font-medium text-text-muted-light dark:text-text-muted-dark">5 PM</span>
-<div class="flex items-center gap-3 justify-end">
-<span class="material-symbols-outlined text-primary/40 text-2xl">air</span>
-<span class="font-bold text-text-light dark:text-text-dark/70 text-lg">10 mph W</span>
-</section>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</main></div>
-<footer class="bg-background-light dark:bg-background-dark mt-8 border-t border-gray-300 dark:border-gray-700">
-<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
-<p>© 2025 Pauls Model Glider. All rights reserved.</p>
-</div>
-</footer>
-
-</body></html>
+</script>        
