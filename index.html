@@ -150,7 +150,7 @@
 <h2 class="text-3xl font-bold mb-4 text-primary text-center">Flying Site Google Maps</h2>
 <div class="aspect-w-16 aspect-h-9 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">      
 <div id="wind-map" style="height: 450px; border-radius: 12px;"></div>
-</section>     
+<!--  /section -->     
 
 <script>
 // Initialize Leaflet map
@@ -183,7 +183,7 @@ if (markers[windDirection]) {
   console.warn('No marker defined for wind direction:', windDirection);
 }
 </script>
-</div>
+
  <!-- google map street view --!>      
 <section id="street-view" class="w-full max-w-screen-xl mx-auto mt-8 p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
   <h2 class="text-3xl font-bold mb-4 text-primary text-center">Street View: Windy Corner</h2>
@@ -198,6 +198,7 @@ if (markers[windDirection]) {
       referrerpolicy="no-referrer-when-downgrade">
     </iframe>
   </div>
+ </div>       
 </section>
         
 <div class="mt-6 flex-grow flex flex-col justify-end">
