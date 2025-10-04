@@ -173,12 +173,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Example wind direction (replace with live data)
-const windDirection = 'SE'; // Options: '1', 'NW', 'SW', 'W'
+const windDirection = 'NE'; // Options: '1', 'NW', 'SW', 'W'
 
 // Define marker positions
 const markers = {
    'N': { lat: 54.24, lng: -4.48, label: 'North Wind' },// Bandy Well Rd or Beinn-y-Phott
-  'NE': { lat: 54.23, lng: -4.46, StreetView:!4v1759433622593!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469, label: 'Northeast Wind' }, // Windy Corner
+  'NE': { lat: 54.23, lng: -4.46, StreetView: '1s-oN4uJcb7DiLvDI7GEosGw', label: 'Northeast Wind' }, // Windy Corner
    'E': { lat: 54.26, lng: -4.45, label: 'Eastly Wind' }, //Verandah
   'SE': { lat: 54.12, lng: -4.73, label: 'Southeast Wind' }, //A36 
    'S': { lat: 54.24, lng: -4.51, label: 'South Wind' }, //Sheep Pens
@@ -187,16 +187,18 @@ const markers = {
   'NW': { lat: 54.23, lng: -4.66, label: 'Northwest Wind' } // white strand
 };
     // Generate Street View URL
-  function getStreetViewURL(lat, lng) {
-    return `https://www.google.com/maps/embed?pb=StreetView'}
-  // Update iframe based on wind direction
-  const streetFrame = document.getElementById("streetFrame");
-  if (markers[windDirection]) {
-    const { lat, lng, label } = markers[windDirection];
-    streetFrame.src = getStreetViewURL(lat, lng);
-  } else {
-    console.warn("No Street View location for wind direction:", windDirection);
-  }  
+function getStreetViewEmbed(panoid) {
+  return `https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!${panoid}!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469`;
+}
+
+const streetFrame = document.getElementById("streetFrame");
+
+if (streetViewPanoids[windDirection]) {
+  const panoid = streetViewPanoids[windDirection];
+  streetFrame.src = getStreetViewEmbed(panoid);
+} else {
+  console.warn("No Street View panoid for wind direction:", windDirection);
+}
         
 // Add selected marker
 if (markers[windDirection]) {
