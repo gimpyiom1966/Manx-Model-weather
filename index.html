@@ -225,7 +225,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Example wind direction (replace with live data)
-const windDirection = 'N'; // Options: '1', 'NW', 'SW', 'W'
+const windDirection = 'E'; // Options: '1', 'NW', 'SW', 'W'
 
 // Define marker positions
 const markers = {
@@ -251,9 +251,9 @@ if (markers[windDirection]) {
 <script>        
 // Generate Street View URL
 const streetViewEmbeds = {
-  'N': "https://www.google.com/maps/embed?pb=!4v1759600000001!6m8!1m7!1sN_PANOID_HERE!2m2!1d54.240000!2d-4.480000!3f180!4f0!5f0.7820865974627469", // Bandy Well Rd or Beinn-y-Phott
+  'N': "https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.3229709797761!4f-7.541260408466712!5f0.7820865974627469", // Bandy Well Rd or Beinn-y-Phott
   'NE': "https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469", // Windy Corner
-  'E': "https://www.google.com/maps/embed?pb=!4v1759600000002!6m8!1m7!1sE_PANOID_HERE!2m2!1d54.260000!2d-4.450000!3f90!4f0!5f0.7820865974627469", // Verandah
+  'E': "https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.9439967438811!4f-2.02844528602175!5f0.7820865974627469", // Verandah
   'SE': "https://www.google.com/maps/embed?pb=!4v1759600000003!6m8!1m7!1sSE_PANOID_HERE!2m2!1d54.120000!2d-4.730000!3f135!4f0!5f0.7820865974627469", // A36
   'S': "https://www.google.com/maps/embed?pb=!4v1759600000004!6m8!1m7!1sS_PANOID_HERE!2m2!1d54.240000!2d-4.510000!3f180!4f0!5f0.7820865974627469", // Sheep Pens
   'SW': "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.62909533872394!4f-1.1032652649421664!5f0.400000000000000", // Beinn-y-Phott
@@ -272,10 +272,10 @@ const streetFrame = document.getElementById("streetFrame");
   }
 }
 
-if (streetViewEmbeds[windDirection1]) {
-  streetFrame.src = streetViewEmbeds[windDirection1];
+if (streetViewEmbeds[windDirection]) {
+  streetFrame.src = streetViewEmbeds[windDirection];
 } else {
-  console.warn("No Street View embed for wind direction:", windDirection1);
+  console.warn("No Street View embed for wind direction:", windDirection);
 }
 
 </script>        
