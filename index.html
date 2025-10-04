@@ -147,11 +147,10 @@
 <!-- Interactive Wind Map -->
 <div class="lg:col-span-2 space-y-8">
 <section id="map-view" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 h-full flex flex-col">        
-<h2 class="text-3xl font-bold mb-4 text-primary text-center">Flying Site Google Maps</h2>
+<h2 class="text-3xl font-bold mb-4 text-primary text-center">Flying Site Map</h2>
 <div class="aspect-w-16 aspect-h-9 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">      
 <div id="wind-map" style="height: 450px; border-radius: 12px;"></div>
-<!--  /section -->     
-
+   
 <script>
 // Initialize Leaflet map
 const map = L.map('wind-map').setView([54.236, -4.495], 10);
@@ -200,8 +199,9 @@ if (markers[windDirection]) {
   </div>
  </div>       
 </section>
-        
-<div class="mt-6 flex-grow flex flex-col justify-end">
+
+<!-- Wind Forcast section--!>
+<section class="mt-6 flex-grow flex flex-col justify-end">
 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Wind Forecast</h3>
 <div class="space-y-2">
 <div class="grid grid-cols-[1fr_auto] items-center bg-background-light dark:bg-background-dark p-3 rounded-md transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-primary shadow-sm">
@@ -230,7 +230,7 @@ if (markers[windDirection]) {
 <div class="flex items-center gap-3 justify-end">
 <span class="material-symbols-outlined text-primary/40 text-2xl">air</span>
 <span class="font-bold text-text-light dark:text-text-dark/70 text-lg">10 mph W</span>
-</div>
+</section>
 </div>
 </div>
 </div>
