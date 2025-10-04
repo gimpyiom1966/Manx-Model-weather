@@ -177,7 +177,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Example wind direction (replace with live data)
-const windDirection = 'NE'; // Options: '1', 'NW', 'SW', 'W'
+const windDirection = 'SW'; // Options: '1', 'NW', 'SW', 'W'
 
 // Define marker positions
 const markers = {
@@ -186,7 +186,7 @@ const markers = {
    'E': { lat: 54.26, lng: -4.45, label: 'Eastly Wind' }, //Verandah
   'SE': { lat: 54.12, lng: -4.73, label: 'Southeast Wind' }, //A36 
    'S': { lat: 54.24, lng: -4.51, label: 'South Wind' }, //Sheep Pens
-  'SW': { lat: 54.25, lng: -4.47, label: 'Southwest Wind' }, //Beinn-y-Phott
+  'SW': { lat: 54.25, lng: -4.47, StreetView: '1su-sbQRBjQDsEKB0MA3m6nA', label: 'Southwest Wind' }, //Beinn-y-Phott
    'W': { lat: 54.24, lng: -4.55, label: 'Westly Wind' }, // Slieau Maggle or Stacks 54.12 -4.73
   'NW': { lat: 54.23, lng: -4.66, label: 'Northwest Wind' } // white strand
 };
