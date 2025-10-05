@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        
 <script>
         tailwind.config = {
             darkMode: "class",
@@ -86,32 +87,33 @@
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
 <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
 <span class="material-symbols-outlined text-primary text-4xl mb-3 weather-icon-spin">air</span>
-<p class="text-sm text-text-muted-light dark:text-text-muted-dark">Wind Speed</p>
-<p class="text-3xl font-bold text-gray-900 dark:text-white temp-change">15 <span class="text-xl font-normal">mph</span></p>
-<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Gusts: 25 mph</p>
+<p id="windSpeed" class="text-3xl font-bold text-gray-900 dark:text-white temp-change">-- <span class="text-xl font-normal">mph</span></p>
+<p id="windGust" class="text-sm text-text-muted-light mt-1">Gusts: -- mph</p>
 </div>
 <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
 <div class="relative w-32 h-32">
 <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
-<div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction: 225deg;">
-<span class="material-symbols-outlined text-primary text-6xl transform -rotate-45">navigation</span>
+  <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:225deg;">
+    <span class="material-symbols-outlined text-primary text-6xl" style="transform: rotate(var(--wind-direction));">
+      navigation
+    </span>
 </div>
 </div>
-<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-3">Wind Direction</p>
+<p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white">--</p>
 <p class="text-2xl font-bold text-gray-900 dark:text-white">SW</p>
 </div>
 <div class="space-y-4 bg-background-light dark:bg-background-dark p-5 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 flex flex-col justify-center">
 <div class="flex items-center gap-3">
 <span class="material-symbols-outlined text-primary">device_thermostat</span>
 <div>
-<p class="text-sm text-text-muted-light dark:text-text-muted-dark">Temperature</p>
+<p id="temp" class="font-bold text-gray-900 dark:text-white text-2xl temp-change">--°C</p>
 <p class="font-bold text-gray-900 dark:text-white text-2xl temp-change">12°C</p>
 </div>
 </div>
 <div class="flex items-center gap-3">
 <span class="material-symbols-outlined text-primary">humidity_percentage</span>
 <div>
-<p class="text-sm text-text-muted-light dark:text-text-muted-dark">Humidity</p>
+<p id="humidity" class="font-bold text-gray-900 dark:text-white text-2xl">--%</p>
 <p class="font-bold text-gray-900 dark:text-white text-2xl">75%</p>
 </div>
 </div>
@@ -216,6 +218,7 @@
 
 <!-- ✅ JavaScript logic -->
 <script>
+ 
 // Initialize Leaflet map
 const map = L.map('wind-map').setView([54.236, -4.495], 10); // show Islee Of Man
 
@@ -225,7 +228,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Example wind direction (replace with live data)
-const windDirection = 'NE'; // Options: '1', 'NW', 'SW', 'W'
+const windDirection = windDirLabel ; // Options: '1', 'NW', 'SW', 'W'
 
 // Define marker positions
 const markers = {
@@ -279,3 +282,90 @@ if (streetViewEmbeds[windDirection]) {
 }
 
 </script>        
+
+<script>
+/* Settings */
+const LAT = 54.236;
+const LON = -4.548;
+const WIND_SPEED_UNIT = 'mph';         // request mph from API
+const TIMEZONE = 'auto';               // let API return localized times
+const VARIABLES = [
+  'temperature_2m',
+  'relative_humidity_2m',
+  'wind_speed_10m',
+  'wind_direction_10m',
+  'wind_gusts_10m'
+];
+
+const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(LAT)}&longitude=${encodeURIComponent(LON)}&hourly=${VARIABLES.join(',')}&windspeed_unit=${encodeURIComponent(WIND_SPEED_UNIT)}&timezone=${encodeURIComponent(TIMEZONE)}`;
+
+/* Utility: map degrees to cardinal label */
+function degToCardinal(deg) {
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  const idx = Math.floor(((deg % 360) / 22.5) + 0.5) % 16;
+  return dirs[idx];
+}
+
+/* Parse response and update DOM */
+async function fetchAndUpdateWeather() {
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error(`Open‑Meteo request failed: ${res.status}`);
+    const data = await res.json();
+
+    // hourly arrays
+    const hourly = data.hourly;
+    if (!hourly || !hourly.time) throw new Error('Unexpected Open‑Meteo response structure');
+
+    // find latest available index (use last element)
+    const lastIdx = hourly.time.length - 1;
+
+    const temp = hourly.temperature_2m ? hourly.temperature_2m[lastIdx] : null;
+    const humidity = hourly.relative_humidity_2m ? hourly.relative_humidity_2m[lastIdx] : null;
+    const windSpeed = hourly.wind_speed_10m ? hourly.wind_speed_10m[lastIdx] : null; // already in mph
+    const windGust = hourly.wind_gusts_10m ? hourly.wind_gusts_10m[lastIdx] : null; // mph
+    const windDirDeg = hourly.wind_direction_10m ? hourly.wind_direction_10m[lastIdx] : null;
+    const windDirLabel = windDirDeg !== null ? degToCardinal(windDirDeg) : '--';
+
+    // Update DOM if elements exist
+    const el = id => document.getElementById(id);
+    if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)} °C`;
+    if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)} %`;
+    if (el('windSpeed') && windSpeed !== null) el('windSpeed').textContent = `${Math.round(windSpeed)} mph`;
+    if (el('windGust') && windGust !== null) el('windGust').textContent = `${Math.round(windGust)} mph`;
+    if (el('windDir')) el('windDir').textContent = windDirDeg !== null ? `${Math.round(windDirDeg)}°` : '--';
+    if (el('windDirLabel')) el('windDirLabel').textContent = windDirLabel;
+
+    // optional: update a compass CSS variable if you have one
+   function setWindDirection(deg, label) {
+    const compass = document.querySelector('.compass-dial');
+        if (compass) compass.style.setProperty('--wind-direction', `${deg}deg`);
+          const labelEl = document.getElementById('windDirLabel');
+          if (labelEl) labelEl.textContent = label || '--';
+                }
+    // timestamp
+    if (el('updated')) {
+      const lastTime = hourly.time[lastIdx];
+      el('updated').textContent = `Last update: ${new Date(lastTime).toLocaleString()}`;
+    }
+
+    return { temp, humidity, windSpeed, windGust, windDirDeg, windDirLabel, raw: data };
+  } catch (err) {
+    console.error('Open‑Meteo fetch error', err);
+    const descEl = document.getElementById('weather-desc');
+    if (descEl) descEl.textContent = 'Unable to load weather';
+    return null;
+  }
+}
+
+/* Auto-refresh every 5 minutes */
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAndUpdateWeather();
+  setInterval(fetchAndUpdateWeather, 300000);
+});
+</script>
+
+
+
+
+        
