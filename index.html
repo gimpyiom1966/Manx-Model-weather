@@ -94,17 +94,17 @@
 <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
 <div class="relative w-32 h-32">
   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
-
-<!-- HTML -->
-<div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:90deg;">
-  <span id="compassNeedle" class="material-symbols-outlined text-primary text-6xl" 
-        style="display:inline-block; transform-origin:center; transition: transform 600ms ease;">
-    navigation
-  </span>
-</div>
+  <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:225deg;">
+    <span class="material-symbols-outlined text-primary text-6xl" style="transform: rotate(var(--wind-direction));">
+      navigation
+    </span>
+  </div>
 </div>
 
-<p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-3">--</p>
+<p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white">--</p>
+
+
+        
 
 </div>
 <div class="space-y-4 bg-background-light dark:bg-background-dark p-5 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 flex flex-col justify-center">
@@ -231,7 +231,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Example wind direction (replace with live data)
-const windDirection = result.windDirLabel; ; // Options: '1', 'NW', 'SW', 'W'
+const windDirection = cardinaLabel; ; // Options: '1', 'NW', 'SW', 'W'
 
 // Define marker positions
 const markers = {
@@ -312,17 +312,15 @@ function degToCardinal(deg) {
   const idx = Math.floor((((deg % 360) + 360) % 360) / 22.5 + 0.5) % 16;
   return dirs[idx];
 }
-
+   /* Compass needle  */     
+function setWindDirection(deg, label) {
+  const compass = document.querySelector('.compass-dial');
+  if (compass) compass.style.setProperty('--wind-direction', `${deg}deg`);
+  const labelEl = document.getElementById('windDirLabel');
+  if (labelEl) labelEl.textContent = label || '--';
+}
 /* Safe element getter */
 function el(id){ return document.getElementById(id); }
-
-/* Use this to choose whether UI points FROM (meteorological) or TO (downwind) */
-/* 'from' -> needle points to where wind is coming from (use raw degrees).
-   'to' -> needle points to where wind is blowing to (add 180). */
-const WIND_POINTING = 'from'; // change to 'to' if you prefer downwind orientation
-
-/* Marker and Street View lookup objects (keep your existing ones elsewhere in the page) */
-/* Ensure these exist globally: window.markers, window.streetViewEmbeds (as in your index.html) */
 
 /* Update UI, map, and street view after receiving data */
 async function fetchAndUpdateWeather() {
@@ -410,21 +408,4 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAndUpdateWeather();
   setInterval(fetchAndUpdateWeather, 300000); // 5 minutes
 });
-</script>
-        
-<!-- JS: use this when you have windDirDeg (meteorological, coming-from) -->
-<script>
-  // Choose orientation: 'from' = use raw meteorological deg; 'to' = show where it's blowing to
-  const WIND_POINTING = 'to'; // set to 'to' because your needle is 180° out
 
-  function applyCompassRotation(windDeg) {
-    if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-    const angle = WIND_POINTING === 'to' ? (windDeg + 180) % 360 : ((windDeg % 360) + 360) % 360;
-    const dial = document.querySelector('.compass-dial');
-    if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
-    const needle = document.getElementById('compassNeedle');
-    if (needle) needle.style.transform = `rotate(${angle}deg)`;
-  }
-
-  // Example: applyCompassRotation(225); // needle will point to 45 if WIND_POINTING='to'
-</script>
