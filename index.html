@@ -232,7 +232,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Example wind direction (replace with live data)
-//const windDirection = 'N'; ; // Options: '1', 'NW', 'SW', 'W'
+const windDirection = windDirLabel; ; // Options: '1', 'NW', 'SW', 'W'
 
 // Define marker positions
 const markers = {
@@ -270,7 +270,7 @@ const streetViewEmbeds = {
   'NW': "https://www.google.com/maps/embed?pb=!4v1759600000006!6m8!1m7!1sNW_PANOID_HERE!2m2!1d54.230000!2d-4.660000!3f315!4f0!5f0.7820865974627469" // White Strand
 };
           
-const windDirection1 = 'W'; // Replace with live data
+
         
 const streetFrame = document.getElementById("streetFrame");
         if (markers[windDirection]) {
@@ -381,8 +381,7 @@ async function fetchAndUpdateWeather() {
           
     // Leaflet marker and Street View: only run when cardinal label is available and markers object exists
     const cardinalKey = windDirLabel;
-          const windDirection = windDirLabel; // get wind direction for map points and street maps
-    if (cardinalKey && window.markers && window.markers[cardinalKey]) {
+      if (cardinalKey && window.markers && window.markers[cardinalKey]) {
       const { lat, lng, label } = window.markers[cardinalKey];
       // Clear existing markers layer if you created one; here we add a fresh marker
       if (window._liveWindMarker) {
@@ -424,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- JS: use this when you have windDirDeg (meteorological, coming-from) -->
 <script>
   // Choose orientation: 'from' = use raw meteorological deg; 'to' = show where it's blowing to
-  const WIND_POINTING = 'to'; // set to 'to' because your needle is 180° out
+  const WIND_POINTING = 'from'; // set to 'to' because your needle is 180° out
 
   function applyCompassRotation(windDeg) {
     if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
