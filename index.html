@@ -93,14 +93,17 @@
 </div>
 <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
 <div class="relative w-32 h-32">
-<div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
+  <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
+
   <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:225deg;">
-    <span class="material-symbols-outlined text-primary text-6xl" style="transform: rotate(var(--wind-direction));">
+    <span class="material-symbols-outlined text-primary text-6xl" id="compassNeedle" style="transform: rotate(var(--wind-direction)); transition: transform 600ms ease;">
       navigation
     </span>
+  </div>
 </div>
-</div>
-<p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white">--</p>
+
+<p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-3">--</p>
+
 </div>
 <div class="space-y-4 bg-background-light dark:bg-background-dark p-5 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 flex flex-col justify-center">
 <div class="flex items-center gap-3">
@@ -218,7 +221,7 @@
 <script>
  
 // Initialize Leaflet map
-const map = L.map('wind-map').setView([54.236, -4.495], 10); // show Islee Of Man
+const map = L.map('wind-map').setView([54.236, -4.495], 10); // show Isle Of Man
 
 // Add OpenStreetMap tiles
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -226,7 +229,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Example wind direction (replace with live data)
-const windDirection = 'NW' ; // Options: '1', 'NW', 'SW', 'W'
+//const windDirection = 'NW' ; // Options: '1', 'NW', 'SW', 'W'
 
 // Define marker positions
 const markers = {
@@ -329,20 +332,35 @@ async function fetchAndUpdateWeather() {
 
     // Update DOM if elements exist
     const el = id => document.getElementById(id);
-    if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)} °C`;
-    if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)} %`;
-    if (el('windSpeed') && windSpeed !== null) el('windSpeed').textContent = `${Math.round(windSpeed)} mph`;
-    if (el('windGust') && windGust !== null) el('windGust').textContent = `${Math.round(windGust)} mph`;
-    if (el('windDir')) el('windDir').textContent = windDirDeg !== null ? `${Math.round(windDirDeg)}°` : '--';
+    if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
+    if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
+    if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
+    if (el('windGust') && windGust !== null) el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
     if (el('windDirLabel')) el('windDirLabel').textContent = windDirLabel;
-
+    if (el('updated')) el('updated').textContent = `Last update: ${new Date(hourly.time[lastIdx]).toLocaleString()}`;
+          
+    // Rotate compass needle: meteorological deg is "coming from".
+    // If you want needle to point TO (downwind), use (windDirDeg + 180) % 360
+    if (typeof windDirDeg === 'number') {
+      const pointingDeg = windDirDeg; // or (windDirDeg + 180) % 360;
+      const compass = document.querySelector('.compass-dial');
+      if (compass) compass.style.setProperty('--wind-direction', `${pointingDeg}deg`);
+    }
+    // Update Street View iframe if you use cardinal-keyed embeds
+    const streetFrame = el('streetFrame'); // ensure your iframe has id="streetFrame"
+    if (streetFrame && window.streetViewEmbeds) {
+      // assume streetViewEmbeds is an object keyed by cardinal labels (e.g. { N: '...', NE: '...' })
+      const embed = window.streetViewEmbeds[windDirLabel];
+      if (embed) streetFrame.src = embed;
+    }
+          
     // optional: update a compass CSS variable if you have one
-   function setWindDirection(deg, label) {
-    const compass = document.querySelector('.compass-dial');
-        if (compass) compass.style.setProperty('--wind-direction', `${deg}deg`);
-          const labelEl = document.getElementById('windDirLabel');
-          if (labelEl) labelEl.textContent = label || '--';
-                }
+ //  function setWindDirection(deg, label) {
+ //   const compass = document.querySelector('.compass-dial');
+//        if (compass) compass.style.setProperty('--wind-direction', `${deg}deg`);
+//          const labelEl = document.getElementById('windDirLabel');
+//          if (labelEl) labelEl.textContent = label || '--';
+ //               }
     // timestamp
     if (el('updated')) {
       const lastTime = hourly.time[lastIdx];
