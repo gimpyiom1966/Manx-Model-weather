@@ -154,7 +154,11 @@
           <!-- Forecast -->
           <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Forecast</h2>
-            <div class="space-y-5">
+
+            <!-- Dynamic forecast strip -->
+            <div id="forecastStrip" class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
+
+            <div class="space-y-5 mt-6">
               <div>
                 <h3 class="font-bold text-primary text-xl">Next 24 Hours</h3>
                 <p class="text-text-light dark:text-text-dark leading-relaxed">Expect intermittent cloud cover with a chance of light showers. Winds are projected to ease gradually to around 10 mph by evening.</p>
@@ -371,7 +375,8 @@ function applyCompassRotation(windDeg) {
         const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
 
         const windDirLabel = degToCardinal(windDirDeg); // FROM direction
-
+        const siteKey = normalizeCardinal(windDirLabel);
+        
         // Update DOM
         if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
         if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
@@ -382,6 +387,35 @@ function applyCompassRotation(windDeg) {
           const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
+// Build forecast strip (next 6–12 hours)
+if (hourly && hourly.time && el('forecastStrip')) {
+  const now = Date.now();
+  const forecastHours = [];
+
+  for (let i = 0; i < hourly.time.length; i++) {
+    const t = Date.parse(hourly.time[i]);
+    if (t > now && forecastHours.length < 12) {
+      forecastHours.push({
+        time: new Date(t),
+        speed: hourly.wind_speed_10m[i],
+        dirDeg: hourly.wind_direction_10m[i]
+      });
+    }
+  }
+
+  el('forecastStrip').innerHTML = forecastHours.map(f => {
+    const label = degToCardinal(f.dirDeg);
+    const hour = f.time.getHours().toString().padStart(2,'0');
+    return `
+      <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 text-center">
+        <p class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">${hour}:00</p>
+        <span class="material-symbols-outlined text-primary text-2xl">air</span>
+        <p class="font-bold text-gray-900 dark:text-white">${Math.round(f.speed)} mph</p>
+        <p class="text-sm text-text-muted-light dark:text-text-muted-dark">${label}</p>
+      </div>
+    `;
+  }).join('');
+}
 
         // Compass rotation
         applyCompassRotation(windDirDeg);
