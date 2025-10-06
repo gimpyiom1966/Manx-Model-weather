@@ -287,11 +287,11 @@ if (streetViewEmbeds[windDirection]) {
 </script>        
 
 <script>
-/* Settings */
+/* CONFIG */
 const LAT = 54.236;
 const LON = -4.548;
-const WIND_SPEED_UNIT = 'mph';         // request mph from API
-const TIMEZONE = 'auto';               // let API return localized times
+const WIND_SPEED_UNIT = 'mph';
+const TIMEZONE = 'auto';
 const VARIABLES = [
   'temperature_2m',
   'relative_humidity_2m',
@@ -300,90 +300,122 @@ const VARIABLES = [
   'wind_gusts_10m'
 ];
 
-const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(LAT)}&longitude=${encodeURIComponent(LON)}&hourly=${VARIABLES.join(',')}&windspeed_unit=${encodeURIComponent(WIND_SPEED_UNIT)}&timezone=${encodeURIComponent(TIMEZONE)}`;
+/* Request current + hourly as fallback (current returns model 15-min values when available) */
+const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(LAT)}&longitude=${encodeURIComponent(LON)}&hourly=${VARIABLES.join(',')}&current=${VARIABLES.join(',')}&windspeed_unit=${encodeURIComponent(WIND_SPEED_UNIT)}&timezone=${encodeURIComponent(TIMEZONE)}`;
 
-/* Utility: map degrees to cardinal label */
+/* Utility: degrees -> 16-point cardinal */
 function degToCardinal(deg) {
+  if (typeof deg !== 'number' || isNaN(deg)) return '--';
   const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-  const idx = Math.floor(((deg % 360) / 22.5) + 0.5) % 16;
+  const idx = Math.floor((((deg % 360) + 360) % 360) / 22.5 + 0.5) % 16;
   return dirs[idx];
 }
 
-/* Parse response and update DOM */
+/* Safe element getter */
+function el(id){ return document.getElementById(id); }
+
+/* Use this to choose whether UI points FROM (meteorological) or TO (downwind) */
+/* 'from' -> needle points to where wind is coming from (use raw degrees).
+   'to' -> needle points to where wind is blowing to (add 180). */
+const WIND_POINTING = 'from'; // change to 'to' if you prefer downwind orientation
+
+/* Marker and Street View lookup objects (keep your existing ones elsewhere in the page) */
+/* Ensure these exist globally: window.markers, window.streetViewEmbeds (as in your index.html) */
+
+/* Update UI, map, and street view after receiving data */
 async function fetchAndUpdateWeather() {
   try {
     const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error(`Open‑Meteo request failed: ${res.status}`);
+    if (!res.ok) throw new Error(`Open-Meteo request failed: ${res.status}`);
     const data = await res.json();
 
-    // hourly arrays
-    const hourly = data.hourly;
-    if (!hourly || !hourly.time) throw new Error('Unexpected Open‑Meteo response structure');
+    // Prefer current fields when present (more immediate). Open‑Meteo returns 'current' object for many models.
+    const current = data.current || null;
+    const hourly = data.hourly || null;
 
-    // find latest available index (use last element)
-    const lastIdx = hourly.time.length - 1;
+    // Helper to pick value: prefer current, fallback to nearest hourly (nearest-to-now safer than last)
+    function pickHourlyNearest(variable) {
+      if (!hourly || !hourly.time) return null;
+      const times = hourly.time;
+      const now = Date.now();
+      // find index of nearest timestamp
+      let nearestIdx = 0;
+      let nearestDiff = Infinity;
+      for (let i = 0; i < times.length; i++) {
+        const t = Date.parse(times[i]);
+        const diff = Math.abs(t - now);
+        if (diff < nearestDiff) { nearestDiff = diff; nearestIdx = i; }
+      }
+      return hourly[variable] && hourly[variable].length > nearestIdx ? hourly[variable][nearestIdx] : null;
+    }
 
-    const temp = hourly.temperature_2m ? hourly.temperature_2m[lastIdx] : null;
-    const humidity = hourly.relative_humidity_2m ? hourly.relative_humidity_2m[lastIdx] : null;
-    const windSpeed = hourly.wind_speed_10m ? hourly.wind_speed_10m[lastIdx] : null; // already in mph
-    const windGust = hourly.wind_gusts_10m ? hourly.wind_gusts_10m[lastIdx] : null; // mph
-    const windDirDeg = hourly.wind_direction_10m ? hourly.wind_direction_10m[lastIdx] : null;
-    const windDirLabel = windDirDeg !== null ? degToCardinal(windDirDeg) : '--';
+    // Extract values: prefer current, else nearest hourly
+    const temp = current && typeof current.temperature_2m === 'number' ? current.temperature_2m : pickHourlyNearest('temperature_2m');
+    const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
+    const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
+    const windGust = current && typeof current.wind_gusts_10m === 'number' ? current.wind_gusts_10m : pickHourlyNearest('wind_gusts_10m');
+    const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
 
-    // Update DOM if elements exist
-    const el = id => document.getElementById(id);
+    const windDirLabel = (typeof windDirDeg === 'number') ? degToCardinal(windDirDeg) : '--';
+
+    // Update DOM elements (guard for existence)
     if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
     if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
     if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
     if (el('windGust') && windGust !== null) el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
     if (el('windDirLabel')) el('windDirLabel').textContent = windDirLabel;
-    if (el('updated')) el('updated').textContent = `Last update: ${new Date(hourly.time[lastIdx]).toLocaleString()}`;
-          
-    // Rotate compass needle: meteorological deg is "coming from".
-    // If you want needle to point TO (downwind), use (windDirDeg + 180) % 360
-    if (typeof windDirDeg === 'number') {
-      const pointingDeg = windDirDeg; // or (windDirDeg + 180) % 360;
-      const compass = document.querySelector('.compass-dial');
-      if (compass) compass.style.setProperty('--wind-direction', `${pointingDeg}deg`);
-    }
-    // Update Street View iframe if you use cardinal-keyed embeds
-    const streetFrame = el('streetFrame'); // ensure your iframe has id="streetFrame"
-    if (streetFrame && window.streetViewEmbeds) {
-      // assume streetViewEmbeds is an object keyed by cardinal labels (e.g. { N: '...', NE: '...' })
-      const embed = window.streetViewEmbeds[windDirLabel];
-      if (embed) streetFrame.src = embed;
-    }
-          
-    // optional: update a compass CSS variable if you have one
- //  function setWindDirection(deg, label) {
- //   const compass = document.querySelector('.compass-dial');
-//        if (compass) compass.style.setProperty('--wind-direction', `${deg}deg`);
-//          const labelEl = document.getElementById('windDirLabel');
-//          if (labelEl) labelEl.textContent = label || '--';
- //               }
-    // timestamp
     if (el('updated')) {
-      const lastTime = hourly.time[lastIdx];
-      el('updated').textContent = `Last update: ${new Date(lastTime).toLocaleString()}`;
+      const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
+      el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
+    }
+
+    // Compass rotation: decide 'from' vs 'to'
+    if (typeof windDirDeg === 'number') {
+      const angle = WIND_POINTING === 'to' ? (windDirDeg + 180) % 360 : ((windDirDeg % 360) + 360) % 360;
+      const compass = document.querySelector('.compass-dial');
+      if (compass) compass.style.setProperty('--wind-direction', `${angle}deg`);
+      // also rotate the needle element explicitly if you rely on inline transform
+      const needle = el('compassNeedle');
+      if (needle) needle.style.transform = `rotate(${angle}deg)`;
+    }
+
+    // Leaflet marker and Street View: only run when cardinal label is available and markers object exists
+    const cardinalKey = windDirLabel;
+    if (cardinalKey && window.markers && window.markers[cardinalKey]) {
+      const { lat, lng, label } = window.markers[cardinalKey];
+      // Clear existing markers layer if you created one; here we add a fresh marker
+      if (window._liveWindMarker) {
+        try { window._liveWindMarker.remove(); } catch(e){ /* ignore */ }
+      }
+      window._liveWindMarker = L.marker([lat, lng]).addTo(map).bindPopup(label);
+      map.setView([lat, lng], 12, { animate: true });
+      // update street view iframe if available
+      if (window.streetViewEmbeds && window.streetViewEmbeds[cardinalKey] && el('streetFrame')) {
+        el('streetFrame').src = window.streetViewEmbeds[cardinalKey];
+        const streetLabel = el('streetLabel');
+        if (streetLabel) streetLabel.textContent = `Street View: ${label}`;
+      }
+    } else {
+      // no cardinal mapping found; log for debugging
+      console.warn('No marker/street embed for wind direction cardinal:', cardinalKey);
     }
 
     return { temp, humidity, windSpeed, windGust, windDirDeg, windDirLabel, raw: data };
   } catch (err) {
-    console.error('Open‑Meteo fetch error', err);
-    const descEl = document.getElementById('weather-desc');
-    if (descEl) descEl.textContent = 'Unable to load weather';
+    console.error('Open-Meteo fetch error', err);
+    if (el('updated')) el('updated').textContent = 'Unable to load weather';
     return null;
   }
 }
 
-/* Auto-refresh every 5 minutes */
+/* startup: fetch once, then refresh */
 document.addEventListener('DOMContentLoaded', () => {
+  // ensure global marker/embeds are present (your page defines them earlier)
+  window.markers = window.markers || window.markers; // keep existing
+  window.streetViewEmbeds = window.streetViewEmbeds || window.streetViewEmbeds;
+
+  // initial fetch + keep in sync
   fetchAndUpdateWeather();
-  setInterval(fetchAndUpdateWeather, 300000);
+  setInterval(fetchAndUpdateWeather, 300000); // 5 minutes
 });
 </script>
-
-
-
-
-        
