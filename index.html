@@ -371,6 +371,18 @@ async function fetchAndUpdateWeather() {
     }
         const windDirection = windDirLabel; // get wind direction for map points and street maps
           
+         // decide display angle using same convention as compass
+        const angle = WIND_POINTING === 'to' ? (windDirDeg + 180) % 360 : ((windDirDeg % 360) + 360) % 360;
+
+        // rotate compass
+        applyCompassRotation(windDirDeg);
+
+        // update marker
+        updateMapMarker(windDirLabel);
+
+        // update street view (use angle or deg depending on what you want Google to face)
+        updateStreetView(windDirLabel, angle); 
+          
     // Leaflet marker and Street View: only run when cardinal label is available and markers object exists
     const cardinalKey = windDirLabel;
     if (cardinalKey && window.markers && window.markers[cardinalKey]) {
