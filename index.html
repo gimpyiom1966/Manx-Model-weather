@@ -253,14 +253,6 @@ const markers = {
   'NW': { lat: 54.23, lng: -4.66, label: 'White Strand' } // white strand
 };
        
-// Add selected marker
-if (markers[windDirLabel]) {
-  const { lat, lng, label } = markers[windDirLabel];
-  L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
-} else {
-  console.warn('No marker defined for wind direction:', windDirLabel);
-}
-</script>
         
 <script>        
 // Generate Street View URL
@@ -276,25 +268,34 @@ const streetViewEmbeds = {
   'NW': "https://www.google.com/maps/embed?pb=!4v1759600000006!6m8!1m7!1sNW_PANOID_HERE!2m2!1d54.230000!2d-4.660000!3f315!4f0!5f0.7820865974627469" // White Strand
 };
           
-
-        
 const streetFrame = document.getElementById("streetFrame");
-        if (markers[windDirLabel]) {
-  const { label } = markers[windDirLabel];
-  const streetLabel = document.getElementById("streetLabel");
-  if (streetLabel) {
-    streetLabel.textContent = `Street View: ${label}`;
-  }
-}
+        
+function updateMapAndStreetView(cardinal, deg) {
+  if (!cardinal) return;
 
-if (streetViewEmbeds[windDirLabel]) {
-  streetFrame.src = streetViewEmbeds[windDirLabel];
-} else {
-  console.warn("No Street View embed for wind direction:", windDirLabel);
+  // Update marker
+  if (window._liveWindMarker) {
+    try { window._liveWindMarker.remove(); } catch(e){}
+  }
+  const m = markers[cardinal];
+  if (m) {
+    window._liveWindMarker = L.marker([m.lat, m.lng]).addTo(map).bindPopup(m.label).openPopup();
+    map.setView([m.lat, m.lng], 12, { animate: true });
+  }
+
+  // Update Street View
+  const embed = streetViewEmbeds[cardinal];
+  if (embed && document.getElementById('streetFrame')) {
+    document.getElementById('streetFrame').src = embed;
+    const streetLabel = document.getElementById('streetLabel');
+    if (streetLabel) streetLabel.textContent = `Street View: ${m ? m.label : cardinal}`;
+  }
 }
 
 </script>        
 
+
+        
 <script>
 /* CONFIG */
 const LAT = 54.236;
@@ -377,14 +378,12 @@ async function fetchAndUpdateWeather() {
       el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
     }
                  
-        // rotate compass
+    // Rotate compass
         applyCompassRotation(windDirDeg);
 
-        // update marker
-        updateMapMarker(windDirLabel);
+    // Update map + Street View
+        updateMapAndStreetView(windDirLabel, windDirDeg);
 
-        // update street view (use angle or deg depending on what you want Google to face)
-        updateStreetView(windDirLabel, angle); 
           
     // Leaflet marker and Street View: only run when cardinal label is available and markers object exists
     const cardinalKey = windDirLabel;
@@ -428,20 +427,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 // Choose orientation: 'from' = use raw meteorological deg; 'to' = show where it's blowing to
-const WIND_POINTING = 'from'; // wind is coming FROM this direction (meteorological standard)
+const WIND_POINTING = 'from'; // wind is coming FROM this direction
 
 function applyCompassRotation(windDeg) {
   if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-  const angle = ((windDeg % 360) + 360) % 360; // normalize to 0–359
-
-  // Rotate the needle
+  const angle = ((windDeg % 360) + 360) % 360;
   const needle = document.getElementById('compassNeedle');
   if (needle) needle.style.transform = `rotate(${angle}deg)`;
-
-  // Optional: also update CSS variable if you want to rotate the whole dial
   const dial = document.querySelector('.compass-dial');
   if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
 }
+
 </script>
 
 
