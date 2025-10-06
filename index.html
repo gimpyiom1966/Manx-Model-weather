@@ -30,9 +30,7 @@
             "text-muted-light": "#4DB6AC",
             "text-muted-dark": "#80CBC4",
           },
-          fontFamily: {
-            "display": ["Space Grotesk"]
-          },
+          fontFamily: { "display": ["Space Grotesk"] },
           borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1.5rem", "full": "9999px" },
         },
       },
@@ -43,7 +41,7 @@
   <style>
     .compass-dial {
       transform: rotate(var(--wind-direction, 0deg));
-      transition: transform 2s ease-out;
+      transition: transform 600ms ease;
     }
     .temp-change {
       animation: pulse 2s infinite alternate ease-in-out;
@@ -58,7 +56,7 @@
     #compassNeedle {
       display: inline-block;
       transform-origin: center;
-      transition: transform 2s ease-out;
+      transition: transform 600ms ease;
     }
   </style>
 
@@ -74,17 +72,6 @@
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary text-3xl">waves</span>
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">Pauls Model Glider flying Site Guide</h1>
-          </div>
-          <nav class="hidden md:flex items-center gap-6">
-            <a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">Home</a>
-            <a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">Forecast</a>
-            <a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">Radar</a>
-            <a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors" href="#">Observations</a>
-          </nav>
-          <div class="flex items-center">
-            <button class="md:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
-              <span class="material-symbols-outlined">menu</span>
-            </button>
           </div>
         </div>
       </div>
@@ -113,9 +100,7 @@
                 <div class="relative w-32 h-32">
                   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
                   <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:0deg;">
-                    <span id="compassNeedle" class="material-symbols-outlined text-primary text-6xl" style="display:inline-block; transform-origin:center; transition: transform 600ms ease;">
-                      navigation
-                    </span>
+                    <span id="compassNeedle" class="material-symbols-outlined text-primary text-6xl">navigation</span>
                   </div>
                 </div>
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-3">Wind Direction</p>
@@ -154,7 +139,11 @@
           <!-- Forecast -->
           <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Forecast</h2>
-            <div class="space-y-5">
+
+            <!-- Dynamic forecast strip -->
+            <div id="forecastStrip" class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
+
+            <div class="space-y-5 mt-6">
               <div>
                 <h3 class="font-bold text-primary text-xl">Next 24 Hours</h3>
                 <p class="text-text-light dark:text-text-dark leading-relaxed">Expect intermittent cloud cover with a chance of light showers. Winds are projected to ease gradually to around 10 mph by evening.</p>
@@ -243,55 +232,67 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Define marker positions keyed by cardinal labels
+    // Define marker positions keyed by normalized cardinal labels
     const markers = {
-      'N':  { lat: 54.24, lng: -4.48, label: 'North Wind' },           // Bandy Well Rd or Beinn-y-Phott
-      'NE': { lat: 54.23, lng: -4.46, label: 'Windy Corner' },          // Windy Corner
-      'ENE':{ lat: 54.23, lng: -4.46, label: 'Windy Corner2' },         // Windy Corner
-      'E':  { lat: 54.26, lng: -4.45, label: 'Verandah' },              // Verandah
-      'SE': { lat: 54.12, lng: -4.73, label: 'Sloth Road' },            // A36
-      'S':  { lat: 54.24, lng: -4.51, label: 'Sheep Pens' },            // Sheep Pens
-      'SW': { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' },         // Beinn-y-Phott
-      'SSW': { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' },         // Beinn-y-Phott
-      'W':  { lat: 54.12, lng: -4.73, label: 'Stacks' },                // Slieau Maggle / Stacks
-      'NW': { lat: 54.23, lng: -4.66, label: 'White Strand' }           // White Strand
+      'N':  { lat: 54.24, lng: -4.48, label: 'North Wind' },
+      'NE': { lat: 54.23, lng: -4.46, label: 'Windy Corner' },
+      'E':  { lat: 54.26, lng: -4.45, label: 'Verandah' },
+      'SE': { lat: 54.12, lng: -4.73, label: 'Sloth Road' },
+      'S':  { lat: 54.24, lng: -4.51, label: 'Sheep Pens' },
+      'SW': { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' },
+      'W':  { lat: 54.12, lng: -4.73, label: 'Stacks' },
+      'NW': { lat: 54.23, lng: -4.66, label: 'White Strand' }
     };
 
-    // Street View embed URLs keyed by cardinal labels
+    // Street View embed URLs keyed by normalized cardinal labels
     const streetViewEmbeds = {
-      'N':  "https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.3229709797761!4f-7.541260408466712!5f0.7820865974627469",
-      'NE': "https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469",
-      'ENE':"https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469",
-      'E':  "https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.9439967438811!4f-2.02844528602175!5f0.7820865974627469",
-      'SE': "https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.33636707336223!4f-1.4741538160368606!5f0.7820865974627469",
-      'S':  "https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.11561766586988!4f-7.7498410558731905!5f0.7820865974627469",
-      'SW': "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.62909533872394!4f-1.1032652649421664!5f0.400000000000000",
-      'SSW': "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.62909533872394!4f-1.1032652649421664!5f0.400000000000000",
-      'W':  "https://www.google.com/maps/embed?pb=!4v1759599080198!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f289.4655636396303!4f3.1774959027562346!5f0.7820865974627469",
+      'N':  "https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469",
+      'NE': "https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469",
+      'E':  "https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.94!4f-2.03!5f0.7820865974627469",
+      'SE': "https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469",
+      'S':  "https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469",
+      'SW': "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.63!4f-1.10!5f0.400000000000000",
+      'W':  "https://www.google.com/maps/embed?pb=!4v1759599080198!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f289.47!4f3.18!5f0.7820865974627469",
       'NW': "https://www.google.com/maps/embed?pb=!4v1759600000006!6m8!1m7!1sNW_PANOID_HERE!2m2!1d54.230000!2d-4.660000!3f315!4f0!5f0.7820865974627469"
     };
+
+    // Normalize 16-point cardinal to 8 primary keys used in markers/embeds
+    function normalizeCardinal(label) {
+      const map = {
+        N:'N', NNE:'N', NNW:'N',
+        NE:'NE', ENE:'NE',
+        E:'E', ESE:'E',
+        SE:'SE', SSE:'SE',
+        S:'S', SSW:'S',
+        SW:'SW', WSW:'SW',
+        W:'W', WNW:'W',
+        NW:'NW'
+      };
+      return map[label] || label;
+    }
 
     // Helper to update marker + Street View together
     function updateMapAndStreetView(cardinal, deg) {
       if (!cardinal) return;
+      const key = normalizeCardinal(cardinal);
 
       // Update marker
       if (window._liveWindMarker) {
         try { window._liveWindMarker.remove(); } catch(e){}
       }
-      const m = markers[cardinal];
+      const m = markers[key];
       if (m) {
         window._liveWindMarker = L.marker([m.lat, m.lng]).addTo(map).bindPopup(m.label).openPopup();
         try { map.setView([m.lat, m.lng], 12, { animate: true }); } catch(e){}
       }
 
       // Update Street View
-      const embed = streetViewEmbeds[cardinal];
+      const embed = streetViewEmbeds[key];
       const frame = document.getElementById('streetFrame');
       if (embed && frame) {
         frame.src = embed;
         const streetLabel = document.getElementById('streetLabel');
-        if (streetLabel) streetLabel.textContent = `Street View: ${m ? m.label : cardinal}`;
+        if (streetLabel) streetLabel.textContent = `Street View: ${m ? m.label : key}`;
       }
     }
   </script>
@@ -325,19 +326,15 @@
     /* Safe element getter */
     function el(id){ return document.getElementById(id); }
 
-    /* Compass orientation: 'from' shows where wind is coming FROM */
-    const WIND_POINTING = 'from';
-
-    /* Rotate compass needle and dial */
-function applyCompassRotation(windDeg) {
-  if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-  const angle = ((windDeg % 360) + 360) % 360;
-  const needle = document.getElementById('compassNeedle');
-  if (needle) needle.style.transform = `rotate(${angle + 180}deg)`; // add 180°
-  const dial = document.querySelector('.compass-dial');
-  if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
-}
-
+    /* Rotate compass needle and dial (add 180° so arrow points into the wind) */
+    function applyCompassRotation(windDeg) {
+      if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
+      const angle = ((windDeg % 360) + 360) % 360;
+      const needle = document.getElementById('compassNeedle');
+      if (needle) needle.style.transform = `rotate(${angle + 180}deg)`;
+      const dial = document.querySelector('.compass-dial');
+      if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
+    }
 
     /* Fetch and update DOM */
     async function fetchAndUpdateWeather() {
@@ -371,6 +368,7 @@ function applyCompassRotation(windDeg) {
         const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
 
         const windDirLabel = degToCardinal(windDirDeg); // FROM direction
+        const siteKey = normalizeCardinal(windDirLabel);
 
         // Update DOM
         if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
@@ -383,11 +381,41 @@ function applyCompassRotation(windDeg) {
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
 
+        // Build forecast strip (next 6–12 hours)
+        if (hourly && hourly.time && el('forecastStrip')) {
+          const now = Date.now();
+          const forecastHours = [];
+
+          for (let i = 0; i < hourly.time.length; i++) {
+            const t = Date.parse(hourly.time[i]);
+            if (t > now && forecastHours.length < 12) {
+              forecastHours.push({
+                time: new Date(t),
+                speed: hourly.wind_speed_10m[i],
+                dirDeg: hourly.wind_direction_10m[i]
+              });
+            }
+          }
+
+          el('forecastStrip').innerHTML = forecastHours.map(f => {
+            const label = degToCardinal(f.dirDeg);
+            const hour = f.time.getHours().toString().padStart(2,'0');
+            return `
+              <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 text-center">
+                <p class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">${hour}:00</p>
+                <span class="material-symbols-outlined text-primary text-2xl">air</span>
+                <p class="font-bold text-gray-900 dark:text-white">${Math.round(f.speed)} mph</p>
+                <p class="text-sm text-text-muted-light dark:text-text-muted-dark">${label}</p>
+              </div>
+            `;
+          }).join('');
+        }
+
         // Compass rotation
         applyCompassRotation(windDirDeg);
 
-        // Map + Street View updates
-        updateMapAndStreetView(windDirLabel, windDirDeg);
+        // Map + Street View updates (normalized key)
+        updateMapAndStreetView(siteKey, windDirDeg);
 
       } catch (err) {
         console.error('Open-Meteo fetch error', err);
@@ -403,4 +431,3 @@ function applyCompassRotation(windDeg) {
   </script>
 </body>
 </html>
-        
