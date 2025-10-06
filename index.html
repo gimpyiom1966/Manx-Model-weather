@@ -252,6 +252,7 @@
       'SE': { lat: 54.12, lng: -4.73, label: 'Sloth Road' },            // A36
       'S':  { lat: 54.24, lng: -4.51, label: 'Sheep Pens' },            // Sheep Pens
       'SW': { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' },         // Beinn-y-Phott
+      'SSW': { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' },         // Beinn-y-Phott
       'W':  { lat: 54.12, lng: -4.73, label: 'Stacks' },                // Slieau Maggle / Stacks
       'NW': { lat: 54.23, lng: -4.66, label: 'White Strand' }           // White Strand
     };
@@ -265,6 +266,7 @@
       'SE': "https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.33636707336223!4f-1.4741538160368606!5f0.7820865974627469",
       'S':  "https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.11561766586988!4f-7.7498410558731905!5f0.7820865974627469",
       'SW': "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.62909533872394!4f-1.1032652649421664!5f0.400000000000000",
+      'SSW': "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.62909533872394!4f-1.1032652649421664!5f0.400000000000000",
       'W':  "https://www.google.com/maps/embed?pb=!4v1759599080198!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f289.4655636396303!4f3.1774959027562346!5f0.7820865974627469",
       'NW': "https://www.google.com/maps/embed?pb=!4v1759600000006!6m8!1m7!1sNW_PANOID_HERE!2m2!1d54.230000!2d-4.660000!3f315!4f0!5f0.7820865974627469"
     };
@@ -327,14 +329,15 @@
     const WIND_POINTING = 'from';
 
     /* Rotate compass needle and dial */
-    function applyCompassRotation(windDeg) {
-      if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-      const angle = ((windDeg % 360) + 360) % 360;
-      const needle = document.getElementById('compassNeedle');
-      if (needle) needle.style.transform = `rotate(${angle}deg)`;
-      const dial = document.querySelector('.compass-dial');
-      if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
-    }
+function applyCompassRotation(windDeg) {
+  if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
+  const angle = ((windDeg % 360) + 360) % 360;
+  const needle = document.getElementById('compassNeedle');
+  if (needle) needle.style.transform = `rotate(${angle + 180}deg)`; // add 180°
+  const dial = document.querySelector('.compass-dial');
+  if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
+}
+
 
     /* Fetch and update DOM */
     async function fetchAndUpdateWeather() {
