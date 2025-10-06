@@ -94,11 +94,12 @@
 <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
 <div class="relative w-32 h-32">
   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
-  <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:225deg;">
-    <span class="material-symbols-outlined text-primary text-6xl" style="transform: rotate(var(--wind-direction));">
-      navigation
-    </span>
-  </div>
+<div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:0deg;">
+  <span id="compassNeedle" class="material-symbols-outlined text-primary text-6xl" 
+        style="display:inline-block; transform-origin:center; transition: transform 600ms ease;">
+    navigation
+  </span>
+</div>
 </div>
 
 <p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white">--</p>
@@ -368,7 +369,8 @@ async function fetchAndUpdateWeather() {
       const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
       el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
     }
-
+        const windDirection = windDirLabel; // get wind direction for map points and street maps
+          
     // Leaflet marker and Street View: only run when cardinal label is available and markers object exists
     const cardinalKey = windDirLabel;
     if (cardinalKey && window.markers && window.markers[cardinalKey]) {
@@ -410,3 +412,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+<!-- JS: use this when you have windDirDeg (meteorological, coming-from) -->
+<script>
+  // Choose orientation: 'from' = use raw meteorological deg; 'to' = show where it's blowing to
+  const WIND_POINTING = 'to'; // set to 'to' because your needle is 180° out
+
+  function applyCompassRotation(windDeg) {
+    if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
+    const angle = WIND_POINTING === 'to' ? (windDeg + 180) % 360 : ((windDeg % 360) + 360) % 360;
+    const dial = document.querySelector('.compass-dial');
+    if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
+    const needle = document.getElementById('compassNeedle');
+    if (needle) needle.style.transform = `rotate(${angle}deg)`;
+  }
+
+  // Example: applyCompassRotation(225); // needle will point to 45 if WIND_POINTING='to'
+</script>
+
+        
