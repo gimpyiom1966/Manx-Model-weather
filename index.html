@@ -364,7 +364,8 @@ async function fetchAndUpdateWeather() {
     const windGust = current && typeof current.wind_gusts_10m === 'number' ? current.wind_gusts_10m : pickHourlyNearest('wind_gusts_10m');
     const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
 
-    const windDirLabel = degToCardinal(windDeg); // ✅ wind coming FROM this direction
+   const windDirLabel = degToCardinal(windDirDeg); // ✅ use the fetched degrees
+
 
 
     // Update DOM elements (guard for existence)
@@ -384,36 +385,7 @@ async function fetchAndUpdateWeather() {
     // Update map + Street View
         updateMapAndStreetView(windDirLabel, windDirDeg);
 
-          
-    // Leaflet marker and Street View: only run when cardinal label is available and markers object exists
-    const cardinalKey = windDirLabel;
-      if (cardinalKey && window.markers && window.markers[cardinalKey]) {
-      const { lat, lng, label } = window.markers[cardinalKey];
-      // Clear existing markers layer if you created one; here we add a fresh marker
-      if (window._liveWindMarker) {
-        try { window._liveWindMarker.remove(); } catch(e){ /* ignore */ }
-      }
-      window._liveWindMarker = L.marker([lat, lng]).addTo(map).bindPopup(label);
-      map.setView([lat, lng], 12, { animate: true });
-      // update street view iframe if available
-      if (window.streetViewEmbeds && window.streetViewEmbeds[cardinalKey] && el('streetFrame')) {
-        el('streetFrame').src = window.streetViewEmbeds[cardinalKey];
-        const streetLabel = el('streetLabel');
-        if (streetLabel) streetLabel.textContent = `Street View: ${label}`;
-      }
-    } else {
-      // no cardinal mapping found; log for debugging
-      console.warn('No marker/street embed for wind direction cardinal:', cardinalKey);
-    }
-
-    return { temp, humidity, windSpeed, windGust, windDirDeg, windDirLabel, raw: data };
-  } catch (err) {
-    console.error('Open-Meteo fetch error', err);
-    if (el('updated')) el('updated').textContent = 'Unable to load weather';
-    return null;
-  }
-}
-
+   
 /* startup: fetch once, then refresh */
 document.addEventListener('DOMContentLoaded', () => {
   // ensure global marker/embeds are present (your page defines them earlier)
