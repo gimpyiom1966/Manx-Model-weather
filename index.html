@@ -426,8 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- JS: use this when you have windDirDeg (meteorological, coming-from) -->
 <script>
   // Choose orientation: 'from' = use raw meteorological deg; 'to' = show where it's blowing to
-  const WIND_POINTING = 'from'; // set to 'to' because your needle is 180° out
-
+  const WIND_POINTING = 'from'; // ✅ wind is coming FROM this direction (meteorological standard)
   function applyCompassRotation(windDeg) {
     if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
     const angle = ((windDeg % 360) + 360) % 360;
