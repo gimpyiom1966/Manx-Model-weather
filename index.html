@@ -234,7 +234,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Example wind direction (replace with live data)
-windDirection = "windDirLabel"; ; // Options: '1', 'NW', 'SW', 'W'
+//windDirection = "windDirLabel"; ; // Options: '1', 'NW', 'SW', 'W'
 
 // Define marker positions
 const markers = {
@@ -250,11 +250,11 @@ const markers = {
 };
        
 // Add selected marker
-if (markers[windDirection]) {
-  const { lat, lng, label } = markers[windDirection];
+if (markers[windDirLabel]) {
+  const { lat, lng, label } = markers[windDirLabel];
   L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
 } else {
-  console.warn('No marker defined for wind direction:', windDirection);
+  console.warn('No marker defined for wind direction:', windDirLabel);
 }
 </script>
         
@@ -275,18 +275,18 @@ const streetViewEmbeds = {
 
         
 const streetFrame = document.getElementById("streetFrame");
-        if (markers[windDirection]) {
-  const { label } = markers[windDirection];
+        if (markers[windDirLabel]) {
+  const { label } = markers[windDirLabel];
   const streetLabel = document.getElementById("streetLabel");
   if (streetLabel) {
     streetLabel.textContent = `Street View: ${label}`;
   }
 }
 
-if (streetViewEmbeds[windDirection]) {
-  streetFrame.src = streetViewEmbeds[windDirection];
+if (streetViewEmbeds[windDirLabel]) {
+  streetFrame.src = streetViewEmbeds[windDirLabel];
 } else {
-  console.warn("No Street View embed for wind direction:", windDirection);
+  console.warn("No Street View embed for wind direction:", windDirLabel);
 }
 
 </script>        
@@ -359,7 +359,8 @@ async function fetchAndUpdateWeather() {
     const windGust = current && typeof current.wind_gusts_10m === 'number' ? current.wind_gusts_10m : pickHourlyNearest('wind_gusts_10m');
     const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
 
-    const windDirLabel = (typeof windDirDeg === 'number') ? degToCardinal(windDirDeg) : '--';
+    const windDirLabel = degToCardinal(windDeg); // ✅ wind coming FROM this direction
+
 
     // Update DOM elements (guard for existence)
     if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
@@ -429,14 +430,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyCompassRotation(windDeg) {
     if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-    const angle = WIND_POINTING === 'to' ? (windDeg + 180) % 360 : ((windDeg % 360) + 360) % 360;
-    const dial = document.querySelector('.compass-dial');
-    if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
-    const needle = document.getElementById('compassNeedle');
-    if (needle) needle.style.transform = `rotate(${angle}deg)`;
-  }
+    const angle = ((windDeg % 360) + 360) % 360;
+document.querySelector('.compass-dial')?.style.setProperty('--wind-direction', `${angle}deg`);
+document.getElementById('compassNeedle')?.style.setProperty('transform', `rotate(${angle}deg)`);
 
-  // Example: applyCompassRotation(225); // needle will point to 45 if WIND_POINTING='to'
-</script>
+  }
+ </script>
 
         
