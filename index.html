@@ -369,11 +369,7 @@ async function fetchAndUpdateWeather() {
       const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
       el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
     }
-        const windDirection = windDirLabel; // get wind direction for map points and street maps
-          
-         // decide display angle using same convention as compass
-        const angle = WIND_POINTING === 'to' ? (windDirDeg + 180) % 360 : ((windDirDeg % 360) + 360) % 360;
-
+                 
         // rotate compass
         applyCompassRotation(windDirDeg);
 
@@ -385,6 +381,7 @@ async function fetchAndUpdateWeather() {
           
     // Leaflet marker and Street View: only run when cardinal label is available and markers object exists
     const cardinalKey = windDirLabel;
+          const windDirection = windDirLabel; // get wind direction for map points and street maps
     if (cardinalKey && window.markers && window.markers[cardinalKey]) {
       const { lat, lng, label } = window.markers[cardinalKey];
       // Clear existing markers layer if you created one; here we add a fresh marker
