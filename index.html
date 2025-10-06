@@ -36,7 +36,6 @@
         }
     </script>
 <style>
-<style>
   .compass-dial {
     transform: rotate(var(--wind-direction, 0deg));
     transition: transform 2s ease-out;
@@ -384,7 +383,7 @@ async function fetchAndUpdateWeather() {
 
     // Update map + Street View
         updateMapAndStreetView(windDirLabel, windDirDeg);
-
+  }
    
 /* startup: fetch once, then refresh */
 document.addEventListener('DOMContentLoaded', () => {
