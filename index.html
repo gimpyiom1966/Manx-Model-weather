@@ -94,7 +94,7 @@
 <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
 <div class="relative w-32 h-32">
   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
-  <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:225deg;">
+  <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:0deg;">
     <span class="material-symbols-outlined text-primary text-6xl" style="transform: rotate(var(--wind-direction));">
       navigation
     </span>
@@ -409,3 +409,4 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchAndUpdateWeather, 300000); // 5 minutes
 });
 
+</script>
