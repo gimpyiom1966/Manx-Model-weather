@@ -317,7 +317,7 @@ function el(id){ return document.getElementById(id); }
 /* Use this to choose whether UI points FROM (meteorological) or TO (downwind) */
 /* 'from' -> needle points to where wind is coming from (use raw degrees).
    'to' -> needle points to where wind is blowing to (add 180). */
-const WIND_POINTING = 'to'; // change to 'to' if you prefer downwind orientation
+const WIND_POINTING = 'from'; // change to 'to' if you prefer downwind orientation
 
 /* Marker and Street View lookup objects (keep your existing ones elsewhere in the page) */
 /* Ensure these exist globally: window.markers, window.streetViewEmbeds (as in your index.html) */
