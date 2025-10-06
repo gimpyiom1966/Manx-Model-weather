@@ -95,11 +95,13 @@
 <div class="relative w-32 h-32">
   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
 
-  <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:225deg;">
-    <span class="material-symbols-outlined text-primary text-6xl" id="compassNeedle" style="transform: rotate(var(--wind-direction)); transition: transform 600ms ease;">
-      navigation
-    </span>
-  </div>
+<!-- HTML -->
+<div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:0deg;">
+  <span id="compassNeedle" class="material-symbols-outlined text-primary text-6xl" 
+        style="display:inline-block; transform-origin:center; transition: transform 600ms ease;">
+    navigation
+  </span>
+</div>
 </div>
 
 <p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-3">--</p>
