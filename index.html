@@ -232,6 +232,7 @@ const windDirection = 'windDirLabel' ; // Options: '1', 'NW', 'SW', 'W'
 const markers = {
    'N': { lat: 54.24, lng: -4.48, label: 'North Wind' },// Bandy Well Rd or Beinn-y-Phott
   'NE': { lat: 54.23, lng: -4.46, label: 'Windy Corner' }, // Windy Corner
+  'ENE': { lat: 54.23, lng: -4.46, label: 'Windy Corner2' }, // Windy Corner      
    'E': { lat: 54.26, lng: -4.45, label: 'Verandah' }, //Verandah
   'SE': { lat: 54.12, lng: -4.73, label: 'Sloth Road' }, //A36 
    'S': { lat: 54.24, lng: -4.51, label: 'Sheep Pens' }, //Sheep Pens
@@ -254,6 +255,7 @@ if (markers[windDirection]) {
 const streetViewEmbeds = {
   'N': "https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.3229709797761!4f-7.541260408466712!5f0.7820865974627469", // Bandy Well Rd or Beinn-y-Phott
   'NE': "https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469", // Windy Corner
+  'ENE': "https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.2631780595343!4f0.4599784374144491!5f0.7820865974627469", // Windy Corner
   'E': "https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.9439967438811!4f-2.02844528602175!5f0.7820865974627469", // Verandah
   'SE': "https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.33636707336223!4f-1.4741538160368606!5f0.7820865974627469", // A36
   'S': "https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.11561766586988!4f-7.7498410558731905!5f0.7820865974627469", // Sheep Pens
