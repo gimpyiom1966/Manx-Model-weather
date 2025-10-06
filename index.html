@@ -36,25 +36,29 @@
         }
     </script>
 <style>
-        .compass-dial {
-            transform: rotate(var(--wind-direction, 0deg));
-            transition: transform 2s ease-out;
-        }
-        .temp-change {
-            animation: pulse 2s infinite alternate ease-in-out;
-        }
-        @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
-        }
-        .weather-icon-spin {
-            animation: spin 5s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+<style>
+  .compass-dial {
+    transform: rotate(var(--wind-direction, 0deg));
+    transition: transform 2s ease-out;
+  }
+  .temp-change {
+    animation: pulse 2s infinite alternate ease-in-out;
+  }
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+  }
+  .weather-icon-spin {
+    animation: spin 5s linear infinite;
+  }
+  #compassNeedle {
+    display: inline-block;
+    transform-origin: center;
+    transition: transform 2s ease-out;
+  }
+</style>
+
+
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
 <div class="flex flex-col min-h-screen">
@@ -94,7 +98,7 @@
 <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
 <div class="relative w-32 h-32">
   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
-<div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:80deg;">
+<div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:0deg;">
   <span id="compassNeedle" class="material-symbols-outlined text-primary text-6xl" 
         style="display:inline-block; transform-origin:center; transition: transform 600ms ease;">
     navigation
@@ -102,7 +106,7 @@
 </div>
 </div>
 <p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-3">Wind Direction</p>
-<p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white">--</p>
+<p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">--</p>
 
 
         
@@ -367,7 +371,7 @@ async function fetchAndUpdateWeather() {
     if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
     if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
     if (el('windGust') && windGust !== null) el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
-    if (el('windDirLabel')) el('windDirLabel').textContent = windDirLabel;
+    if (el('windDirLabel')) el('windDirLabel').textContent = `Wind From: ${windDirLabel}`;
     if (el('updated')) {
       const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
       el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
@@ -427,9 +431,15 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
   // Choose orientation: 'from' = use raw meteorological deg; 'to' = show where it's blowing to
   const WIND_POINTING = 'from'; // ✅ wind is coming FROM this direction (meteorological standard)
-  function applyCompassRotation(windDeg) {
-    if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-    const angle = ((windDeg % 360) + 360) % 360;
+function applyCompassRotation(windDeg) {
+  if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
+  const angle = ((windDeg % 360) + 360) % 360; // normalize to 0–359
+
+  // Apply rotation to needle
+  const needle = document.getElementById('compassNeedle');
+  if (needle) needle.style.transform = `rotate(${angle}deg)`;
+}
+
 document.querySelector('.compass-dial')?.style.setProperty('--wind-direction', `${angle}deg`);
 document.getElementById('compassNeedle')?.style.setProperty('transform', `rotate(${angle}deg)`);
 
