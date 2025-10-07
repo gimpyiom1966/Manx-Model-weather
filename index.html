@@ -28,12 +28,12 @@
             "text-light": "#006064",
             "text-dark": "#B2EBF2",
             "text-muted-light": "#4DB6AC",
-            "text-muted-dark": "#80CBC4"
+            "text-muted-dark": "#80CBC4",
           },
           fontFamily: { display: ["Space Grotesk"] },
-          borderRadius: { DEFAULT: "0.5rem", lg: "0.75rem", xl: "1.5rem", full: "9999px" }
-        }
-      }
+          borderRadius: { DEFAULT: "0.5rem", lg: "0.75rem", xl: "1.5rem", full: "9999px" },
+        },
+      },
     };
   </script>
 
@@ -53,6 +53,7 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
   <div class="flex flex-col min-h-screen">
+    <!-- Header -->
     <header class="bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-300 dark:border-gray-700">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
@@ -64,36 +65,33 @@
       </div>
     </header>
 
+    <!-- Main -->
     <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-
-        <!-- Left column (2/5): Flying Site Map then Weather Radar underneath -->
+        <!-- Left column (2/5): Weather Radar on top, Flying Site Map below -->
         <div class="lg:col-span-2 space-y-8">
-          <!-- Radar + toggle -->
+          <!-- Weather Radar -->
           <section id="radar-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <div class="flex flex-col">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
-                <div id="radarToggle" class="ml-4 flex gap-2">
-                  <button id="btnWindy" class="toggle-btn toggle-active">Windy (default)</button>
-                  <button id="btnOpenMeteo" class="toggle-btn toggle-inactive">Open‑Meteo</button>
-                </div>
-              </div>
-
-              <div style="height:320px; border-radius:12px; overflow:hidden;" class="bg-gray-200 dark:bg-gray-700">
-                <!-- Windy lazy-loaded iframe (data-src used until activated) -->
-                <iframe
-                  id="weatherRadarIframe"
-                  class="embed-full"
-                  data-src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
-                  title="Weather radar"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                ></iframe>
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
+              <div id="radarToggle" class="ml-4 flex gap-2">
+                <button id="btnWindy" class="toggle-btn toggle-active">Windy (default)</button>
+                <button id="btnOpenMeteo" class="toggle-btn toggle-inactive">Open‑Meteo</button>
               </div>
             </div>
+            <div style="height:320px; border-radius:12px; overflow:hidden;" class="bg-gray-200 dark:bg-gray-700">
+              <!-- Windy lazy-loaded iframe (data-src used until activated) -->
+              <iframe
+                id="weatherRadarIframe"
+                class="embed-full"
+                data-src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
+                title="Weather radar"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
           </section>
-        </div> 
+
           <!-- Flying Site Map -->
           <section id="map-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-2xl font-bold mb-4 text-primary text-center">Flying Site Map</h2>
@@ -101,6 +99,7 @@
               <div id="wind-map" style="height:420px; border-radius:12px;"></div>
             </div>
           </section>
+        </div>
 
         <!-- Right column (3/5): Current Conditions + Street View -->
         <div class="lg:col-span-3 space-y-8">
@@ -109,6 +108,7 @@
             <h2 class="text-2xl font-bold mb-4 text-primary text-center">Current Conditions: Isle of Man</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <!-- Wind Speed -->
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
                 <span class="material-symbols-outlined text-primary text-4xl mb-3 weather-icon-spin">air</span>
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark">Wind Speed</p>
@@ -116,6 +116,7 @@
                 <p id="windGust" class="text-sm text-text-muted-light mt-1">Gusts: -- mph</p>
               </div>
 
+              <!-- Wind Direction -->
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
                 <div class="relative w-32 h-32">
                   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
@@ -127,6 +128,7 @@
                 <p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">--</p>
               </div>
 
+              <!-- Temperature / Humidity -->
               <div class="space-y-4 bg-background-light dark:bg-background-dark p-5 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 flex flex-col justify-center">
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-primary">device_thermostat</span>
@@ -176,10 +178,10 @@
             </div>
           </section>
         </div>
-
       </div>
     </main>
 
+    <!-- Footer -->
     <footer class="bg-background-light dark:bg-background-dark mt-8 border-t border-gray-300 dark:border-gray-700">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
         <p>© 2025 Pauls Model Glider. All rights reserved.</p>
@@ -187,8 +189,10 @@
     </footer>
   </div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+  <!-- Map + Street View helpers -->
   <script>
     // Initialize Leaflet map
     const map = L.map('wind-map', { preferCanvas: true }).setView([54.236, -4.495], 10);
@@ -255,6 +259,7 @@
     }
   </script>
 
+  <!-- Weather fetch + UI updates + Radar toggle -->
   <script>
     const LAT = 54.236;
     const LON = -4.548;
@@ -288,27 +293,24 @@
       if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
     }
 
-    // Windy default and toggle logic
-    const windyIframe = document.getElementById('weatherRadarIframe');
-    const windyUrl = windyIframe?.getAttribute('data-src');
+    // Working radar toggle: Windy default
     function setActiveRadar(view) {
       const btnW = document.getElementById('btnWindy');
       const btnO = document.getElementById('btnOpenMeteo');
       const radarFrame = document.getElementById('weatherRadarIframe');
+      const windyUrl = radarFrame?.getAttribute('data-src');
 
       if (view === 'windy') {
-        // lazy-load Windy if not yet loaded
         if (radarFrame && (!radarFrame.src || radarFrame.getAttribute('data-src-loaded') !== 'true')) {
           radarFrame.src = windyUrl;
-          radarFrame.setAttribute('data-src-loaded','true');
+          radarFrame.setAttribute('data-src-loaded', 'true');
         }
-        btnW.classList.add('toggle-active'); btnW.classList.remove('toggle-inactive');
-        btnO.classList.remove('toggle-active'); btnO.classList.add('toggle-inactive');
+        if (btnW) { btnW.classList.add('toggle-active'); btnW.classList.remove('toggle-inactive'); }
+        if (btnO) { btnO.classList.remove('toggle-active'); btnO.classList.add('toggle-inactive'); }
       } else {
-        // If you have an Open-Meteo iframe/panel replace logic here.
-        // For now, we keep Windy visible but mark toggle state visually.
-        btnO.classList.add('toggle-active'); btnO.classList.remove('toggle-inactive');
-        btnW.classList.remove('toggle-active'); btnW.classList.add('toggle-inactive');
+        // Placeholder: if you add an Open‑Meteo iframe/panel later, wire it here.
+        if (btnO) { btnO.classList.add('toggle-active'); btnO.classList.remove('toggle-inactive'); }
+        if (btnW) { btnW.classList.remove('toggle-active'); btnW.classList.add('toggle-inactive'); }
       }
     }
 
@@ -354,6 +356,7 @@
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
 
+        // Forecast strip (next 12 future hours)
         if (hourly && hourly.time && el('forecastStrip')) {
           const now = Date.now();
           const forecastHours = [];
@@ -391,11 +394,11 @@
       }
     }
 
+    // Boot
     document.addEventListener('DOMContentLoaded', () => {
-      // Default Windy on first load
-      setActiveRadar('windy');
+      setActiveRadar('windy'); // Default Windy on first load
 
-      // Wire toggle
+      // Wire toggle buttons
       const bW = document.getElementById('btnWindy');
       const bO = document.getElementById('btnOpenMeteo');
       if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
@@ -407,3 +410,4 @@
   </script>
 </body>
 </html>
+```
