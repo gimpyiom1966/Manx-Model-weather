@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pauls Model Glider flying Site Guide - Isle of Man Weather</title>
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect"/>
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -19,7 +19,7 @@
       theme: {
         extend: {
           colors: {
-            "primary": "#00A0A0",
+            primary: "#00A0A0",
             "background-light": "#E0F7FA",
             "background-dark": "#004D40",
             "card-light": "#FFFFFF",
@@ -28,25 +28,24 @@
             "text-light": "#006064",
             "text-dark": "#B2EBF2",
             "text-muted-light": "#4DB6AC",
-            "text-muted-dark": "#80CBC4",
+            "text-muted-dark": "#80CBC4"
           },
-          fontFamily: { "display": ["Space Grotesk"] },
-          borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1.5rem", "full": "9999px" },
-        },
-      },
-    }
+          fontFamily: { display: ["Space Grotesk"] },
+          borderRadius: { DEFAULT: "0.5rem", lg: "0.75rem", xl: "1.5rem", full: "9999px" }
+        }
+      }
+    };
   </script>
 
-  <!-- Inline CSS -->
   <style>
     .compass-dial { transform: rotate(var(--wind-direction, 0deg)); transition: transform 600ms ease; }
     .temp-change { animation: pulse 2s infinite alternate ease-in-out; }
     @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
     .weather-icon-spin { animation: spin 5s linear infinite; }
     #compassNeedle { display: inline-block; transform-origin: center; transition: transform 600ms ease; }
+    .embed-full { width: 100%; height: 100%; border: 0; display: block; }
   </style>
 
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
@@ -64,31 +63,39 @@
 
     <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        
-        <!-- Left column (2/5): Flying Site Map + Weather Radar -->
+
+        <!-- Left column (2/5): Flying Site Map then Weather Radar underneath -->
         <div class="lg:col-span-2 space-y-8">
           <!-- Flying Site Map -->
-          <section id="map-view" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 h-full flex flex-col">
-            <h2 class="text-3xl font-bold mb-4 text-primary text-center">Flying Site Map</h2>
-            <div class="aspect-w-16 aspect-h-9 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
-              <div id="wind-map" style="height: 450px; border-radius: 12px;"></div>
+          <section id="map-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <h2 class="text-2xl font-bold mb-4 text-primary text-center">Flying Site Map</h2>
+            <div class="rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
+              <div id="wind-map" style="height:420px; border-radius:12px;"></div>
             </div>
           </section>
 
-          <!-- Weather Radar -->
-          <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Weather Radar</h2>
-            <div class="aspect-w-16 aspect-h-9 bg-gray-300 dark:bg-gray-700 rounded-lg overflow-hidden h-[30vh] md:h-[40vh] shadow-inner">
-              <iframe class="w-full h-full" frameborder="0" src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"></iframe>
+          <!-- Weather Radar (under the map) -->
+          <section id="radar-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <h2 class="text-2xl font-bold mb-4 text-primary text-center">Weather Radar</h2>
+            <div style="height:320px; border-radius:12px; overflow:hidden;" class="bg-gray-200 dark:bg-gray-700">
+              <iframe
+                id="weatherRadarIframe"
+                class="embed-full"
+                src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
+                title="Weather radar"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
-          </div>
+          </section>
         </div>
 
         <!-- Right column (3/5): Current Conditions + Street View -->
         <div class="lg:col-span-3 space-y-8">
           <!-- Current Conditions -->
-          <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Current Conditions: Isle of Man</h2>
+          <section id="conditions-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <h2 class="text-2xl font-bold mb-4 text-primary text-center">Current Conditions: Isle of Man</h2>
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
                 <span class="material-symbols-outlined text-primary text-4xl mb-3 weather-icon-spin">air</span>
@@ -126,21 +133,21 @@
                 <p id="updated" class="text-xs text-text-muted-light dark:text-text-muted-dark mt-2">Last update: --</p>
               </div>
             </div>
-          </div>
+          </section>
 
           <!-- Street View -->
-          <section id="street-view" class="w-full max-w-screen-xl mx-auto mt-0 p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
-            <h2 id="streetLabel" class="text-3xl font-bold mb-4 text-primary text-center">Street View:</h2>
-            <div class="rounded-lg overflow-hidden shadow-inner">
-              <iframe id="streetFrame" class="w-full h-[420px] rounded-lg" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <section id="street-view" class="w-full bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <h2 id="streetLabel" class="text-2xl font-bold mb-4 text-primary text-center">Street View</h2>
+            <div class="rounded-lg overflow-hidden shadow-inner" style="height:420px;">
+              <iframe id="streetFrame" class="embed-full" title="Street View" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
           </section>
         </div>
 
         <!-- Forecast full width -->
         <div class="lg:col-span-5">
-          <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Forecast</h2>
+          <section id="forecast-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <h2 class="text-2xl font-bold mb-4 text-primary text-center">Forecast</h2>
 
             <div id="forecastStrip" class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
 
@@ -149,13 +156,13 @@
                 <h3 class="font-bold text-primary text-xl">Next 24 Hours</h3>
                 <p class="text-text-light dark:text-text-dark leading-relaxed">Expect intermittent cloud cover with a chance of light showers. Winds are projected to ease gradually to around 10 mph by evening.</p>
               </div>
-              <hr class="border-gray-300 dark:border-gray-600"/>
+              <hr class="border-gray-300 dark:border-gray-600" />
               <div>
                 <h3 class="font-bold text-primary text-xl">Extended Forecast</h3>
                 <p class="text-text-light dark:text-text-dark leading-relaxed">The week ahead promises predominantly sunny skies with moderate temperatures, hovering near a pleasant 15°C.</p>
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
       </div>
@@ -168,37 +175,35 @@
     </footer>
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <!-- Map + Street View helpers -->
   <script>
-    // Initialize Leaflet map
-    const map = L.map('wind-map').setView([54.236, -4.495], 10);
+    // Leaflet map init
+    const map = L.map('wind-map', { preferCanvas: true }).setView([54.236, -4.495], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     const markers = {
-      'N':  { lat: 54.24, lng: -4.48, label: 'North Wind' },
-      'NE': { lat: 54.23, lng: -4.46, label: 'Windy Corner' },
-      'E':  { lat: 54.26, lng: -4.45, label: 'Verandah' },
-      'SE': { lat: 54.12, lng: -4.73, label: 'Sloth Road' },
-      'S':  { lat: 54.24, lng: -4.51, label: 'Sheep Pens' },
-      'SW': { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' },
-      'W':  { lat: 54.12, lng: -4.73, label: 'Stacks' },
-      'NW': { lat: 54.23, lng: -4.66, label: 'White Strand' }
+      N:  { lat: 54.24, lng: -4.48, label: 'North Wind' },
+      NE: { lat: 54.23, lng: -4.46, label: 'Windy Corner' },
+      E:  { lat: 54.26, lng: -4.45, label: 'Verandah' },
+      SE: { lat: 54.12, lng: -4.73, label: 'Sloth Road' },
+      S:  { lat: 54.24, lng: -4.51, label: 'Sheep Pens' },
+      SW: { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' },
+      W:  { lat: 54.12, lng: -4.73, label: 'Stacks' },
+      NW: { lat: 54.23, lng: -4.66, label: 'White Strand' }
     };
 
     const streetViewEmbeds = {
-      'N':  "https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469",
-      'NE': "https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469",
-      'E':  "https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.94!4f-2.03!5f0.7820865974627469",
-      'SE': "https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469",
-      'S':  "https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469",
-      'SW': "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.63!4f-1.10!5f0.400000000000000",
-      'W':  "https://www.google.com/maps/embed?pb=!4v1759599080198!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f289.47!4f3.18!5f0.7820865974627469",
-      'NW': "https://www.google.com/maps/embed?pb=!4v1759600000006!6m8!1m7!1sNW_PANOID_HERE!2m2!1d54.230000!2d-4.660000!3f315!4f0!5f0.7820865974627469"
+      N:  "https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469",
+      NE: "https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469",
+      E:  "https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.94!4f-2.03!5f0.7820865974627469",
+      SE: "https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469",
+      S:  "https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469",
+      SW: "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.63!4f-1.10!5f0.400000000000000",
+      W:  "https://www.google.com/maps/embed?pb=!4v1759599080198!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f289.47!4f3.18!5f0.7820865974627469",
+      NW: "https://www.google.com/maps/embed?pb=!4v1759600000006!6m8!1m7!1sNW_PANOID_HERE!2m2!1d54.230000!2d-4.660000!3f315!4f0!5f0.7820865974627469"
     };
 
     function normalizeCardinal(label) {
@@ -215,17 +220,17 @@
       return map[label] || label;
     }
 
-    function updateMapAndStreetView(cardinal, deg) {
+    function updateMapAndStreetView(cardinal) {
       if (!cardinal) return;
       const key = normalizeCardinal(cardinal);
 
       if (window._liveWindMarker) {
-        try { window._liveWindMarker.remove(); } catch(e){}
+        try { window._liveWindMarker.remove(); } catch (e) {}
       }
       const m = markers[key];
       if (m) {
         window._liveWindMarker = L.marker([m.lat, m.lng]).addTo(map).bindPopup(m.label).openPopup();
-        try { map.setView([m.lat, m.lng], 12, { animate: true }); } catch(e){}
+        try { map.setView([m.lat, m.lng], 12, { animate: true }); } catch (e) {}
       }
 
       const embed = streetViewEmbeds[key];
@@ -238,7 +243,6 @@
     }
   </script>
 
-  <!-- Weather fetch + UI updates -->
   <script>
     const LAT = 54.236;
     const LON = -4.548;
@@ -261,7 +265,7 @@
       return dirs[idx];
     }
 
-    function el(id){ return document.getElementById(id); }
+    function el(id) { return document.getElementById(id); }
 
     function applyCompassRotation(windDeg) {
       if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
@@ -317,7 +321,6 @@
         if (hourly && hourly.time && el('forecastStrip')) {
           const now = Date.now();
           const forecastHours = [];
-
           for (let i = 0; i < hourly.time.length; i++) {
             const t = Date.parse(hourly.time[i]);
             if (t > now && forecastHours.length < 12) {
@@ -344,7 +347,7 @@
         }
 
         applyCompassRotation(windDirDeg);
-        updateMapAndStreetView(siteKey, windDirDeg);
+        updateMapAndStreetView(siteKey);
 
       } catch (err) {
         console.error('Open-Meteo fetch error', err);
@@ -357,8 +360,5 @@
       setInterval(fetchAndUpdateWeather, 300000);
     });
   </script>
-</body>
-</html>
-
 </body>
 </html>
