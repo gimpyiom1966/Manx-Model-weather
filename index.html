@@ -55,7 +55,7 @@
   <div class="flex flex-col min-h-screen">
     <!-- Header -->
     <header class="bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-300 dark:border-gray-700">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="container mx-auto px-2 sm:px-4 lg:px-6">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary text-3xl">waves</span>
@@ -66,20 +66,20 @@
     </header>
 
     <!-- Main -->
-    <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+    <main class="flex-grow container mx-auto px-2 sm:px-4 lg:px-6 py-6">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <!-- Left column (2/5): Weather Radar on top, Flying Site Map below -->
-        <div class="lg:col-span-2 space-y-8">
+        <div class="lg:col-span-2 space-y-6">
           <!-- Weather Radar -->
-          <section id="radar-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
-              <div id="radarToggle" class="ml-4 flex gap-2">
+          <section id="radar-section" class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-xl md:text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
+              <div id="radarToggle" class="ml-3 flex gap-2">
                 <button id="btnWindy" class="toggle-btn toggle-active">Windy (default)</button>
                 <button id="btnOpenMeteo" class="toggle-btn toggle-inactive">Open‑Meteo</button>
               </div>
             </div>
-            <div style="height:320px; border-radius:12px; overflow:hidden;" class="bg-gray-200 dark:bg-gray-700">
+            <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden h-[360px] md:h-[50vh]">
               <!-- Windy lazy-loaded iframe (data-src used until activated) -->
               <iframe
                 id="weatherRadarIframe"
@@ -93,16 +93,16 @@
           </section>
 
           <!-- Flying Site Map -->
-          <section id="map-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <h2 class="text-2xl font-bold mb-4 text-primary text-center">Flying Site Map</h2>
-            <div class="rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
+          <section id="map-section" class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl md:text-2xl font-bold mb-3 text-primary text-center">Flying Site Map</h2>
+            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
               <div id="wind-map" style="height:420px; border-radius:12px;"></div>
             </div>
           </section>
         </div>
 
         <!-- Right column (3/5): Current Conditions + Street View -->
-        <div class="lg:col-span-3 space-y-8">
+        <div class="lg:col-span-3 space-y-6">
           <!-- Current Conditions -->
           <section id="conditions-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-2xl font-bold mb-4 text-primary text-center">Current Conditions: Isle of Man</h2>
@@ -183,7 +183,7 @@
 
     <!-- Footer -->
     <footer class="bg-background-light dark:bg-background-dark mt-8 border-t border-gray-300 dark:border-gray-700">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
+      <div class="container mx-auto px-2 sm:px-4 lg:px-6 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
         <p>© 2025 Pauls Model Glider. All rights reserved.</p>
       </div>
     </footer>
@@ -218,7 +218,7 @@
       SE: "https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469",
       S:  "https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469",
       SW: "https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.63!4f-1.10!5f0.400000000000000",
-      W:  "https://www.google.com/maps/embed?pb=!4v1759599080198!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f289.47!4f3.18!5f0.7820865974627469",
+      W:  "https://www.google.com/maps.embed?pb=!4v1759599080198!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f289.47!4f3.18!5f0.7820865974627469",
       NW: "https://www.google.com/maps/embed?pb=!4v1759600000006!6m8!1m7!1sNW_PANOID_HERE!2m2!1d54.230000!2d-4.660000!3f315!4f0!5f0.7820865974627469"
     };
 
@@ -410,4 +410,3 @@
   </script>
 </body>
 </html>
-```
