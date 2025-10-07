@@ -51,7 +51,6 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
   <div class="flex flex-col min-h-screen">
-    <!-- Header -->
     <header class="bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-300 dark:border-gray-700">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
@@ -63,24 +62,41 @@
       </div>
     </header>
 
-    <!-- Main -->
     <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
         
-        <!-- Left column (narrower: 2/5) -->
+        <!-- Left column (2/5): Flying Site Map + Weather Radar -->
         <div class="lg:col-span-2 space-y-8">
+          <!-- Flying Site Map -->
+          <section id="map-view" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 h-full flex flex-col">
+            <h2 class="text-3xl font-bold mb-4 text-primary text-center">Flying Site Map</h2>
+            <div class="aspect-w-16 aspect-h-9 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
+              <div id="wind-map" style="height: 450px; border-radius: 12px;"></div>
+            </div>
+          </section>
+
+          <!-- Weather Radar -->
+          <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Weather Radar</h2>
+            <div class="aspect-w-16 aspect-h-9 bg-gray-300 dark:bg-gray-700 rounded-lg overflow-hidden h-[30vh] md:h-[40vh] shadow-inner">
+              <iframe class="w-full h-full" frameborder="0" src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column (3/5): Current Conditions + Street View -->
+        <div class="lg:col-span-3 space-y-8">
           <!-- Current Conditions -->
           <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Current Conditions: Isle of Man</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <!-- Wind Speed -->
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
                 <span class="material-symbols-outlined text-primary text-4xl mb-3 weather-icon-spin">air</span>
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark">Wind Speed</p>
                 <p id="windSpeed" class="text-3xl font-bold text-gray-900 dark:text-white temp-change">-- <span class="text-xl font-normal">mph</span></p>
                 <p id="windGust" class="text-sm text-text-muted-light mt-1">Gusts: -- mph</p>
               </div>
-              <!-- Wind Direction -->
+
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
                 <div class="relative w-32 h-32">
                   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
@@ -91,7 +107,7 @@
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-3">Wind Direction</p>
                 <p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">--</p>
               </div>
-              <!-- Temperature / Humidity -->
+
               <div class="space-y-4 bg-background-light dark:bg-background-dark p-5 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 flex flex-col justify-center">
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-primary">device_thermostat</span>
@@ -112,31 +128,12 @@
             </div>
           </div>
 
-          <!-- Weather Radar -->
-          <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Weather Radar</h2>
-            <div class="aspect-w-16 aspect-h-9 bg-gray-300 dark:bg-gray-700 rounded-lg overflow-hidden h-[30vh] md:h-[40vh] shadow-inner">
-              <iframe class="w-full h-full" frameborder="0" src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"></iframe>
+          <!-- Street View -->
+          <section id="street-view" class="w-full max-w-screen-xl mx-auto mt-0 p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
+            <h2 id="streetLabel" class="text-3xl font-bold mb-4 text-primary text-center">Street View:</h2>
+            <div class="rounded-lg overflow-hidden shadow-inner">
+              <iframe id="streetFrame" class="w-full h-[420px] rounded-lg" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
-          </div>
-        </div>
-
-        <!-- Right column (wider: 3/5) -->
-        <div class="lg:col-span-3 space-y-8">
-          <!-- Flying Site Map -->
-          <section id="map-view" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 h-full flex flex-col">
-            <h2 class="text-3xl font-bold mb-4 text-primary text-center">Flying Site Map</h2>
-            <div class="aspect-w-16 aspect-h-9 rounded-md overflow-hidden border border-gray-300 dark:border-gray-600">
-              <div id="wind-map" style="height: 450px; border-radius: 12px;"></div>
-            </div>
-
-            <!-- Street view -->
-            <section id="street-view" class="w-full max-w-screen-xl mx-auto mt-8 p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-lg">
-              <h2 id="streetLabel" class="text-3xl font-bold mb-4 text-primary text-center">Street View:</h2>
-              <div class="rounded-lg overflow-hidden shadow-inner">
-                <iframe id="streetFrame" class="w-full h-[450px] rounded-lg" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-              </div>
-            </section>
           </section>
         </div>
 
@@ -145,7 +142,6 @@
           <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-3xl font-bold mb-5 text-primary text-center tracking-wide">Forecast</h2>
 
-            <!-- Dynamic forecast strip -->
             <div id="forecastStrip" class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
 
             <div class="space-y-5 mt-6">
@@ -165,7 +161,6 @@
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-background-light dark:bg-background-dark mt-8 border-t border-gray-300 dark:border-gray-700">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
         <p>© 2025 Pauls Model Glider. All rights reserved.</p>
@@ -184,7 +179,6 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Define marker positions keyed by normalized cardinal labels
     const markers = {
       'N':  { lat: 54.24, lng: -4.48, label: 'North Wind' },
       'NE': { lat: 54.23, lng: -4.46, label: 'Windy Corner' },
@@ -196,7 +190,6 @@
       'NW': { lat: 54.23, lng: -4.66, label: 'White Strand' }
     };
 
-    // Street View embed URLs keyed by normalized cardinal labels
     const streetViewEmbeds = {
       'N':  "https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469",
       'NE': "https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469",
@@ -208,7 +201,6 @@
       'NW': "https://www.google.com/maps/embed?pb=!4v1759600000006!6m8!1m7!1sNW_PANOID_HERE!2m2!1d54.230000!2d-4.660000!3f315!4f0!5f0.7820865974627469"
     };
 
-    // Normalize 16-point cardinal to 8 primary keys used in markers/embeds
     function normalizeCardinal(label) {
       const map = {
         N:'N', NNE:'N', NNW:'N',
@@ -223,12 +215,10 @@
       return map[label] || label;
     }
 
-    // Helper to update marker + Street View together
     function updateMapAndStreetView(cardinal, deg) {
       if (!cardinal) return;
       const key = normalizeCardinal(cardinal);
 
-      // Update marker
       if (window._liveWindMarker) {
         try { window._liveWindMarker.remove(); } catch(e){}
       }
@@ -238,7 +228,6 @@
         try { map.setView([m.lat, m.lng], 12, { animate: true }); } catch(e){}
       }
 
-      // Update Street View
       const embed = streetViewEmbeds[key];
       const frame = document.getElementById('streetFrame');
       if (embed && frame) {
@@ -251,7 +240,6 @@
 
   <!-- Weather fetch + UI updates -->
   <script>
-    /* CONFIG */
     const LAT = 54.236;
     const LON = -4.548;
     const WIND_SPEED_UNIT = 'mph';
@@ -264,10 +252,8 @@
       'wind_gusts_10m'
     ];
 
-    /* Open-Meteo API: request current + hourly (fallback) */
     const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(LAT)}&longitude=${encodeURIComponent(LON)}&hourly=${VARIABLES.join(',')}&current=${VARIABLES.join(',')}&windspeed_unit=${encodeURIComponent(WIND_SPEED_UNIT)}&timezone=${encodeURIComponent(TIMEZONE)}`;
 
-    /* Utility: degrees -> 16-point cardinal */
     function degToCardinal(deg) {
       if (typeof deg !== 'number' || isNaN(deg)) return '--';
       const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
@@ -275,10 +261,8 @@
       return dirs[idx];
     }
 
-    /* Safe element getter */
     function el(id){ return document.getElementById(id); }
 
-    /* Rotate compass needle and dial (add 180° so arrow points into the wind) */
     function applyCompassRotation(windDeg) {
       if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
       const angle = ((windDeg % 360) + 360) % 360;
@@ -288,7 +272,6 @@
       if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
     }
 
-    /* Fetch and update DOM */
     async function fetchAndUpdateWeather() {
       try {
         const res = await fetch(apiUrl);
@@ -312,17 +295,15 @@
           return hourly[variable] && hourly[variable].length > nearestIdx ? hourly[variable][nearestIdx] : null;
         }
 
-        // Extract values (prefer current)
         const temp = current && typeof current.temperature_2m === 'number' ? current.temperature_2m : pickHourlyNearest('temperature_2m');
         const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
         const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
         const windGust = current && typeof current.wind_gusts_10m === 'number' ? current.wind_gusts_10m : pickHourlyNearest('wind_gusts_10m');
         const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
 
-        const windDirLabel = degToCardinal(windDirDeg); // FROM direction
+        const windDirLabel = degToCardinal(windDirDeg);
         const siteKey = normalizeCardinal(windDirLabel);
 
-        // Update DOM
         if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
         if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
         if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
@@ -333,7 +314,6 @@
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
 
-        // Build forecast strip (next 6–12 hours)
         if (hourly && hourly.time && el('forecastStrip')) {
           const now = Date.now();
           const forecastHours = [];
@@ -363,10 +343,7 @@
           }).join('');
         }
 
-        // Compass rotation
         applyCompassRotation(windDirDeg);
-
-        // Map + Street View updates (normalized key)
         updateMapAndStreetView(siteKey, windDirDeg);
 
       } catch (err) {
@@ -375,11 +352,13 @@
       }
     }
 
-    // Startup: fetch once, then refresh
     document.addEventListener('DOMContentLoaded', () => {
       fetchAndUpdateWeather();
-      setInterval(fetchAndUpdateWeather, 300000); // 5 minutes
+      setInterval(fetchAndUpdateWeather, 300000);
     });
   </script>
+</body>
+</html>
+
 </body>
 </html>
