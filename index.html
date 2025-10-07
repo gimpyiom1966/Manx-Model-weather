@@ -171,10 +171,12 @@
       </div>
     </footer>
   </div>
+
   <!-- Load Leaflet JS then Windy loader; only one Leaflet include -->
   <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
   <script src="https://api.windy.com/assets/map-forecast/libBoot.js"></script>
-<script>
+
+  <script>
   // ===========================
   // Windy initialization + fallback layer and toggles
   // ===========================
@@ -225,14 +227,14 @@
     setTimeout(() => clearInterval(check), 10000);
   }
 
-  btnWindy && btnWindy.addEventListener('click', () => {
+  btnWindy.addEventListener('click', () => {
     setActiveButton(btnWindy, btnOpenMeteo);
     ensureWindyReady(() => {
       if (radarFallbackLayer && windyMap.hasLayer(radarFallbackLayer)) windyMap.removeLayer(radarFallbackLayer);
     });
   });
 
-  btnOpenMeteo && btnOpenMeteo.addEventListener('click', () => {
+  btnOpenMeteo.addEventListener('click', () => {
     setActiveButton(btnOpenMeteo, btnWindy);
     ensureWindyReady(() => {
       if (radarFallbackLayer && !windyMap.hasLayer(radarFallbackLayer)) windyMap.addLayer(radarFallbackLayer);
@@ -300,14 +302,19 @@
       }
     }
 
-    // Weather + UI (serverless Point Forecast fetch and DOM updates)
+    // Weather + UI (Open-Meteo fetch and DOM updates)
     const LAT = 54.236, LON = -4.548;
+    const WIND_SPEED_UNIT = 'mph', TIMEZONE = 'auto';
+    const VARIABLES = [ 'temperature_2m', 'relative_humidity_2m', 'wind_speed_10m', 'wind_direction_10m', 'wind_gusts_10m' ];
+    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(LAT)}&longitude=${encodeURIComponent(LON)}&hourly=${VARIABLES.join(',')}&current=${VARIABLES.join(',')}&windspeed_unit=${encodeURIComponent(WIND_SPEED_UNIT)}&timezone=${encodeURIComponent(TIMEZONE)}`;
+
     function degToCardinal(deg) {
       if (typeof deg !== 'number' || isNaN(deg)) return '--';
       const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
       const idx = Math.floor((((deg % 360) + 360) % 360) / 22.5 + 0.5) % 16;
       return dirs[idx];
     }
+
     function el(id) { return document.getElementById(id); }
     function applyCompassRotation(windDeg) {
       if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
@@ -318,83 +325,61 @@
       if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
     }
 
-    // ===== Replace existing fetchAndUpdateWeather() implementation with this =====
+    // Radar toggle references (these buttons already wired above globally)
+    const btnWindyLocal = document.getElementById('btnWindy');
+    const btnOpenMeteoLocal = document.getElementById('btnOpenMeteo');
+
+    // Re-use the outer ensureWindyReady via global functions if user interacts (buttons are wired above too)
     async function fetchAndUpdateWeather() {
       try {
-        const resp = await fetch('/api/point-forecast', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lat: LAT,
-            lon: LON,
-            model: 'gfs',
-            parameters: ['temp','wind_u','wind_v','windGust','rh','pressure'],
-            levels: ['surface']
-          })
-        });
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error(`Open-Meteo request failed: ${res.status}`);
+        const data = await res.json();
+        const current = data.current || null;
+        const hourly = data.hourly || null;
 
-        if (!resp.ok) {
-          const err = await resp.json().catch(()=>({}));
-          console.error('Point forecast proxy error', resp.status, err);
-          if (el('updated')) el('updated').textContent = 'Unable to load weather';
-          return;
-        }
-
-        const payload = await resp.json();
-        const data = payload && payload.data ? payload.data : payload;
-        if (!data || !Array.isArray(data.ts) || data.ts.length === 0) {
-          console.warn('No point forecast data', data);
-          if (el('updated')) el('updated').textContent = 'No forecast data';
-          return;
-        }
-
-        const ts = data.ts;
-        const latestIdx = ts.length - 1;
-
-        const val = (keys) => {
-          for (const k of keys) {
-            if (data[k] && data[k].length > latestIdx) return data[k][latestIdx];
+        function pickHourlyNearest(variable) {
+          if (!hourly || !hourly.time) return null;
+          const times = hourly.time;
+          const now = Date.now();
+          let nearestIdx = 0, nearestDiff = Infinity;
+          for (let i = 0; i < times.length; i++) {
+            const t = Date.parse(times[i]);
+            const diff = Math.abs(t - now);
+            if (diff < nearestDiff) { nearestDiff = diff; nearestIdx = i; }
           }
-          return null;
-        };
-
-        const temp = val(['temp-surface','temp_surface','temp']);
-        const u = val(['wind_u-surface','wind_u_surface','wind_u']) || 0;
-        const v = val(['wind_v-surface','wind_v_surface','wind_v']) || 0;
-        const gust = val(['gust-surface','windGust-surface','windGust','gust']);
-        const rh = val(['rh-surface','rh']);
-        const pressure = val(['pressure-surface','pressure']);
-
-        const speed = Math.sqrt((u*u) + (v*v));
-        const dirDeg = (Math.atan2(-u, -v) * 180 / Math.PI + 360) % 360;
-
-        if (el('temp') && temp !== null && temp !== undefined) el('temp').textContent = `${Math.round(temp)}°C`;
-        if (el('humidity') && rh !== null && rh !== undefined) el('humidity').textContent = `${Math.round(rh)}%`;
-        if (el('windSpeed') && !isNaN(speed)) el('windSpeed').innerHTML = `${Math.round(speed)} <span class="text-xl font-normal">mph</span>`;
-        if (el('windGust') && gust !== null && gust !== undefined) el('windGust').textContent = `Gusts: ${Math.round(gust)} mph`;
-        if (el('windDirLabel')) el('windDirLabel').textContent = `Wind From: ${degToCardinal(dirDeg)}`;
-        if (el('updated')) el('updated').textContent = `Last update: ${new Date(ts[latestIdx]).toLocaleString()}`;
-
-        applyCompassRotation(dirDeg);
-        const siteKey = normalizeCardinal(degToCardinal(dirDeg));
-        updateMapAndStreetView(siteKey);
-
-        const now = Date.now();
-        const forecastHours = [];
-        for (let i = latestIdx; i < ts.length && forecastHours.length < 12; i++) {
-          const t = ts[i];
-          if (t >= now) {
-            const sp = (data['wind-surface'] && data['wind-surface'][i]) ? data['wind-surface'][i] :
-                       ((data['wind_u-surface'] && data['wind_v-surface']) ? Math.sqrt((data['wind_u-surface'][i]||0)**2 + (data['wind_v-surface'][i]||0)**2) : 0);
-            const dirArrU = (data['wind_u-surface'] && data['wind_v-surface']) ? Math.atan2(-(data['wind_u-surface'][i]||0), -(data['wind_v-surface'][i]||0)) * 180/Math.PI : 0;
-            const dirDegF = dirArrU !== null ? (dirArrU + 360) % 360 : 0;
-            forecastHours.push({ time: new Date(t), speed: sp || 0, dirDeg: dirDegF });
-          }
+          return hourly[variable] && hourly[variable].length > nearestIdx ? hourly[variable][nearestIdx] : null;
         }
-        if (el('forecastStrip')) {
+
+        const temp = current && typeof current.temperature_2m === 'number' ? current.temperature_2m : pickHourlyNearest('temperature_2m');
+        const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
+        const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
+        const windGust = current && typeof current.wind_gusts_10m === 'number' ? current.wind_gusts_10m : pickHourlyNearest('wind_gusts_10m');
+        const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
+        const windDirLabel = degToCardinal(windDirDeg);
+        const siteKey = normalizeCardinal(windDirLabel);
+
+        if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
+        if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
+        if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
+        if (el('windGust') && windGust !== null) el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
+        if (el('windDirLabel')) el('windDirLabel').textContent = `Wind From: ${windDirLabel}`;
+        if (el('updated')) {
+          const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
+          el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
+        }
+
+        if (hourly && hourly.time && el('forecastStrip')) {
+          const now = Date.now(), forecastHours = [];
+          for (let i = 0; i < hourly.time.length; i++) {
+            const t = Date.parse(hourly.time[i]);
+            if (t > now && forecastHours.length < 12) {
+              forecastHours.push({ time: new Date(t), speed: hourly.wind_speed_10m[i], dirDeg: hourly.wind_direction_10m[i] });
+            }
+          }
           el('forecastStrip').innerHTML = forecastHours.map(f => {
             const label = degToCardinal(f.dirDeg);
-            const hour = f.time.getHours().toString().padStart(2,'0');
+            const hour = f.time.getHours().toString().padStart(2, '0');
             return `
               <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 text-center">
                 <p class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">${hour}:00</p>
@@ -404,15 +389,19 @@
               </div>`;
           }).join('');
         }
+
+        applyCompassRotation(windDirDeg);
+        updateMapAndStreetView(siteKey);
       } catch (err) {
-        console.error('Point forecast fetch error', err);
+        console.error('Open-Meteo fetch error', err);
         if (el('updated')) el('updated').textContent = 'Unable to load weather';
       }
     }
 
-    // run once now and every 5 minutes
+    // Start weather fetch & periodic refresh
     fetchAndUpdateWeather();
-    setInterval(fetchAndUpdateWeather, 300000);
-    // ===== end replacement =====
-  });
-</script>
+    setInterval(fetchAndUpdateWeather, 300000); // 5 minutes
+  }); // end DOMContentLoaded
+  </script>
+</body>
+</html>
