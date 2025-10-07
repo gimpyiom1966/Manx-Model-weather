@@ -44,6 +44,9 @@
     .weather-icon-spin { animation: spin 5s linear infinite; }
     #compassNeedle { display: inline-block; transform-origin: center; transition: transform 600ms ease; }
     .embed-full { width: 100%; height: 100%; border: 0; display: block; }
+    .toggle-btn { padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+    .toggle-active { background-color: rgba(0,160,160,1); color: white; }
+    .toggle-inactive { background-color: rgba(0,0,0,0.06); color: inherit; }
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -74,18 +77,28 @@
             </div>
           </section>
 
-          <!-- Weather Radar (under the map) -->
+          <!-- Radar + toggle -->
           <section id="radar-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <h2 class="text-2xl font-bold mb-4 text-primary text-center">Weather Radar</h2>
-            <div style="height:320px; border-radius:12px; overflow:hidden;" class="bg-gray-200 dark:bg-gray-700">
-              <iframe
-                id="weatherRadarIframe"
-                class="embed-full"
-                src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
-                title="Weather radar"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-              ></iframe>
+            <div class="flex flex-col">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
+                <div id="radarToggle" class="ml-4 flex gap-2">
+                  <button id="btnWindy" class="toggle-btn toggle-active">Windy (default)</button>
+                  <button id="btnOpenMeteo" class="toggle-btn toggle-inactive">Open‑Meteo</button>
+                </div>
+              </div>
+
+              <div style="height:320px; border-radius:12px; overflow:hidden;" class="bg-gray-200 dark:bg-gray-700">
+                <!-- Windy lazy-loaded iframe (data-src used until activated) -->
+                <iframe
+                  id="weatherRadarIframe"
+                  class="embed-full"
+                  data-src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
+                  title="Weather radar"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
             </div>
           </section>
         </div>
@@ -178,7 +191,7 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
-    // Leaflet map init
+    // Initialize Leaflet map
     const map = L.map('wind-map', { preferCanvas: true }).setView([54.236, -4.495], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -276,6 +289,30 @@
       if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
     }
 
+    // Windy default and toggle logic
+    const windyIframe = document.getElementById('weatherRadarIframe');
+    const windyUrl = windyIframe?.getAttribute('data-src');
+    function setActiveRadar(view) {
+      const btnW = document.getElementById('btnWindy');
+      const btnO = document.getElementById('btnOpenMeteo');
+      const radarFrame = document.getElementById('weatherRadarIframe');
+
+      if (view === 'windy') {
+        // lazy-load Windy if not yet loaded
+        if (radarFrame && (!radarFrame.src || radarFrame.getAttribute('data-src-loaded') !== 'true')) {
+          radarFrame.src = windyUrl;
+          radarFrame.setAttribute('data-src-loaded','true');
+        }
+        btnW.classList.add('toggle-active'); btnW.classList.remove('toggle-inactive');
+        btnO.classList.remove('toggle-active'); btnO.classList.add('toggle-inactive');
+      } else {
+        // If you have an Open-Meteo iframe/panel replace logic here.
+        // For now, we keep Windy visible but mark toggle state visually.
+        btnO.classList.add('toggle-active'); btnO.classList.remove('toggle-inactive');
+        btnW.classList.remove('toggle-active'); btnW.classList.add('toggle-inactive');
+      }
+    }
+
     async function fetchAndUpdateWeather() {
       try {
         const res = await fetch(apiUrl);
@@ -356,9 +393,19 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Default Windy on first load
+      setActiveRadar('windy');
+
+      // Wire toggle
+      const bW = document.getElementById('btnWindy');
+      const bO = document.getElementById('btnOpenMeteo');
+      if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
+      if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
+
       fetchAndUpdateWeather();
       setInterval(fetchAndUpdateWeather, 300000);
     });
   </script>
 </body>
 </html>
+
