@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pauls Model Glider flying Site Guide - Isle of Man Weather</title>
-
+<!--Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect" />
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-
+<!--Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>
     tailwind.config = {
@@ -61,30 +61,24 @@
         </div>
       </div>
     </header>
-
+<!--Main -->
     <main class="flex-grow container mx-auto px-2 sm:px-4 lg:px-6 py-6">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div class="lg:col-span-2 space-y-6">
           <section id="radar-section" class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-3">
-              <h2 class="text-xl md:text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
-              <div id="radarToggle" class="ml-3 flex gap-2">
-                <button id="btnWindy" class="toggle-btn toggle-active" type="button">Windy (default)</button>
-                <button id="btnOpenMeteo" class="toggle-btn toggle-inactive" type="button">Open‑Meteo</button>
-              </div>
-            </div>
-            <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden h-[360px] md:h-[50vh]">
-              <iframe
-                id="weatherRadarIframe"
-                class="embed-full"
-                data-src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
-                title="Weather radar"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-              ></iframe>
-            </div>
-          </section>
+          <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl md:text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
+          <div id="radarToggle" class="ml-3 flex gap-2">
+          <button id="btnWindy" class="toggle-btn toggle-active" type="button">Windy (default)</button>
+          <button id="btnOpenMeteo" class="toggle-btn toggle-inactive" type="button">Open‑Meteo</button>
+        </div>
+      </div>
 
+      <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden h-[360px] md:h-[50vh]">
+    <div id="windy" style="width:100%;height:100%"></div>
+  </div>
+</section>
+<!--fly Site Map -->
           <section id="map-section" class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
             <h2 class="text-xl md:text-2xl font-bold mb-3 text-primary text-center">Flying Site Map</h2>
             <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
@@ -92,7 +86,7 @@
             </div>
           </section>
         </div>
-
+<!--Current Condition + Street View -->
         <div class="lg:col-span-3 space-y-6">
           <section id="conditions-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-2xl font-bold mb-4 text-primary text-center">Current Conditions: Isle of Man</h2>
@@ -104,7 +98,7 @@
                 <p id="windSpeed" class="text-3xl font-bold text-gray-900 dark:text-white temp-change">-- <span class="text-xl font-normal">mph</span></p>
                 <p id="windGust" class="text-sm text-text-muted-light mt-1">Gusts: -- mph</p>
               </div>
-
+<!--Wind Direction -->
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
                 <div class="relative w-32 h-32">
                   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
@@ -115,7 +109,7 @@
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-3">Wind Direction</p>
                 <p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">--</p>
               </div>
-
+<!--Temperature / Humidity -->
               <div class="space-y-4 bg-background-light dark:bg-background-dark p-5 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 flex flex-col justify-center">
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-primary">device_thermostat</span>
@@ -135,7 +129,7 @@
               </div>
             </div>
           </section>
-
+<!--Street View -->
           <section id="street-view" class="w-full bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 id="streetLabel" class="text-2xl font-bold mb-4 text-primary text-center">Street View</h2>
             <div class="rounded-lg overflow-hidden shadow-inner" style="height:420px;">
@@ -143,7 +137,7 @@
             </div>
           </section>
         </div>
-
+<!--Forcast full width -->
         <div class="lg:col-span-5">
           <section id="forecast-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-2xl font-bold mb-4 text-primary text-center">Forecast</h2>
@@ -164,7 +158,7 @@
         </div>
       </div>
     </main>
-
+<!--Footer -->
     <footer class="bg-background-light dark:bg-background-dark mt-8 border-t border-gray-300 dark:border-gray-700">
       <div class="container mx-auto px-2 sm:px-4 lg:px-6 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
         <p>© 2025 Pauls Model Glider. All rights reserved.</p>
@@ -172,6 +166,92 @@
     </footer>
   </div>
 
+<!-- Load Leaflet JS then Windy loader; insert before your main.js -->
+<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+<script src="https://api.windy.com/assets/map-forecast/libBoot.js"></script>
+<script>
+  // Windy options (replace values if you want different defaults)
+  const windyOptions = {
+    key: "ffMzrlRsksafxmsrwT0jxChXNz43ePLh",
+    lat: 54.236,
+    lon: -4.548,
+    zoom: 8,
+    overlay: "wind",
+    level: "surface",
+    detail: true,
+    metricWind: "mph",
+    metricTemp: "°C"
+  };
+
+  // Holders for map and fallback tile
+  let windyMap = null;
+  let radarFallbackLayer = null;
+
+  windyInit(windyOptions, function (windyAPI) {
+    const { map } = windyAPI;
+    windyMap = map;
+
+    // Optional popup at centre
+    L.popup().setLatLng([windyOptions.lat, windyOptions.lon]).setContent('Isle of Man').openOn(map);
+
+    // RainViewer fallback tile layer (not added by default)
+    radarFallbackLayer = L.tileLayer('https://tilecache.rainviewer.com/v2/radar/latest/256/{z}/{x}/{y}/2/1_1.png', {
+      attribution: 'Radar © RainViewer',
+      maxZoom: 12,
+      opacity: 0.6
+    });
+
+    // Ensure Windy map is ready
+    map.whenReady(() => {
+      console.log('Windy map ready');
+    });
+  });
+
+  // UI: toggle between Windy embed (visible) and Open‑Meteo fallback logic
+  // Here "Open‑Meteo" will simply add a RainViewer tile overlay to the same map if available.
+  // If the Windy map is not initialized yet, this will wait until it is.
+  const btnWindy = document.getElementById('btnWindy');
+  const btnOpenMeteo = document.getElementById('btnOpenMeteo');
+
+  function setActiveButton(activeBtn, inactiveBtn) {
+    activeBtn.classList.add('toggle-active'); activeBtn.classList.remove('toggle-inactive');
+    inactiveBtn.classList.remove('toggle-active'); inactiveBtn.classList.add('toggle-inactive');
+  }
+
+  btnWindy.addEventListener('click', () => {
+    setActiveButton(btnWindy, btnOpenMeteo);
+    if (windyMap && radarFallbackLayer && windyMap.hasLayer(radarFallbackLayer)) {
+      windyMap.removeLayer(radarFallbackLayer);
+    }
+  });
+
+  btnOpenMeteo.addEventListener('click', () => {
+    setActiveButton(btnOpenMeteo, btnWindy);
+    if (windyMap && radarFallbackLayer && !windyMap.hasLayer(radarFallbackLayer)) {
+      windyMap.addLayer(radarFallbackLayer);
+    }
+  });
+
+  // Defensive: if Windy not yet ready when user clicks, wait for windyMap
+  function ensureWindyReady(action) {
+    if (windyMap) return action();
+    const check = setInterval(() => {
+      if (windyMap) { clearInterval(check); action(); }
+    }, 200);
+    setTimeout(() => clearInterval(check), 10000); // stop checking after 10s
+  }
+
+  // Wire buttons to ensure readiness
+  btnWindy.addEventListener('click', () => ensureWindyReady(() => {
+    if (radarFallbackLayer && windyMap.hasLayer(radarFallbackLayer)) windyMap.removeLayer(radarFallbackLayer);
+  }));
+  btnOpenMeteo.addEventListener('click', () => ensureWindyReady(() => {
+    if (radarFallbackLayer && !windyMap.hasLayer(radarFallbackLayer)) windyMap.addLayer(radarFallbackLayer);
+  }));
+</script>
+
+  
+<!--Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
