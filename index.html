@@ -288,7 +288,7 @@
       if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
       const angle = ((windDeg % 360) + 360) % 360;
       const needle = document.getElementById('compassNeedle');
-      if (needle) needle.style.transform = `rotate(${angle + 180}deg)`;
+      if (needle) needle.style.transform = `rotate(${angle}deg)`;
       const dial = document.querySelector('.compass-dial');
       if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
     }
