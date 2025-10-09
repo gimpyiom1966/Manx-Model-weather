@@ -114,6 +114,10 @@
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark">Wind Speed</p>
                 <p id="windSpeed" class="text-3xl font-bold text-gray-900 dark:text-white temp-change">-- <span class="text-xl font-normal">mph</span></p>
                 <p id="windGust" class="text-sm text-text-muted-light mt-1">Gusts: -- mph</p>
+                <p id="windDirDegrees" class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Direction: --°</p>
+                 
+
+
               </div>
 
               <!-- Wind Direction -->
@@ -258,6 +262,7 @@
         if (streetLabel) streetLabel.textContent = `Street View: ${m ? m.label : key}`;
       }
     }
+    
   </script>
 
   <!-- Weather fetch + UI updates + Radar toggle -->
@@ -343,7 +348,6 @@
         const temp = current && typeof current.temperature_2m === 'number' ? current.temperature_2m : pickHourlyNearest('temperature_2m');
         const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
         const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
-        
         const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
 
         const windDirLabel = degToCardinal(windDirDeg);
@@ -377,6 +381,10 @@
         if (labelEl && labelEl.textContent !== `Wind From: ${windDirLabel}`) {
           labelEl.textContent = `Wind From: ${windDirLabel}`;
         }
+        if (el('windDirDegrees') && windDirDeg !== null) {
+            el('windDirDegrees').textContent = `Direction: ${Math.round(windDirDeg)}°`;
+            }
+
         if (el('updated')) {
           const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
