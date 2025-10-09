@@ -279,7 +279,7 @@
       'wind_gusts_10m'
     ];
 
-    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=${VARIABLES.join(',')}&daily=maximum_wind_gusts_10m&current=${VARIABLES.join(',')}&windspeed_unit=${WIND_SPEED_UNIT}&timezone=${TIMEZONE}`;
+  const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(LAT)}&longitude=${encodeURIComponent(LON)}&hourly=${VARIABLES.join(',')}&current=${VARIABLES.join(',')}&windspeed_unit=${encodeURIComponent(WIND_SPEED_UNIT)}&timezone=${encodeURIComponent(TIMEZONE)}`;
 
 
     function degToCardinal(deg) {
