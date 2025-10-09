@@ -343,19 +343,12 @@
         const temp = current && typeof current.temperature_2m === 'number' ? current.temperature_2m : pickHourlyNearest('temperature_2m');
         const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
         const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
-        const windGust = current && typeof current.wind_gusts_10m === 'number' ? current.wind_gusts_10m : pickHourlyNearest('wind_gusts_10m');
+        
         const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
 
         const windDirLabel = degToCardinal(windDirDeg);
         const siteKey = normalizeCardinal(windDirLabel);
-        let windGust = null;
-        
-      if (current?.wind_gusts_10m !== undefined && typeof current.wind_gusts_10m === 'number') {
-        windGust = current.wind_gusts_10m;
-          } else {
-        windGust = pickHourlyNearest('wind_gusts_10m') ?? daily?.maximum_wind_gusts_10m?.[0] ?? null;
-                }
-
+      
       if (el('windGust')) {
         if (windGust !== null) {
           el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
