@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
   <meta charset="utf-8" />
@@ -274,7 +274,8 @@
       'wind_gusts_10m'
     ];
 
-    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(LAT)}&longitude=${encodeURIComponent(LON)}&hourly=${VARIABLES.join(',')}&current=${VARIABLES.join(',')}&windspeed_unit=${encodeURIComponent(WIND_SPEED_UNIT)}&timezone=${encodeURIComponent(TIMEZONE)}`;
+    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=${VARIABLES.join(',')}&daily=maximum_wind_gusts_10m&current=${VARIABLES.join(',')}&windspeed_unit=${WIND_SPEED_UNIT}&timezone=${TIMEZONE}`;
+
 
     function degToCardinal(deg) {
       if (typeof deg !== 'number' || isNaN(deg)) return '--';
@@ -347,6 +348,26 @@
 
         const windDirLabel = degToCardinal(windDirDeg);
         const siteKey = normalizeCardinal(windDirLabel);
+        let windGust = null;
+        
+      if (current?.wind_gusts_10m !== undefined && typeof current.wind_gusts_10m === 'number') {
+        windGust = current.wind_gusts_10m;
+          } else {
+        windGust = pickHourlyNearest('wind_gusts_10m') ?? daily?.maximum_wind_gusts_10m?.[0] ?? null;
+                }
+
+      if (el('windGust')) {
+        if (windGust !== null) {
+          el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
+          el('windGust').classList.remove('opacity-50');
+          el('windGust').setAttribute('title', '');
+      } else {
+          el('windGust').textContent = `Gusts: N/A`;
+          el('windGust').classList.add('opacity-50');
+          el('windGust').setAttribute('title', 'Wind gust data not available from Open-Meteo');
+          }
+        }
+
 
         if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
         if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
@@ -356,12 +377,30 @@
                 `<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Direction: ${Math.round(windDirDeg)}°</p>`);
         const labelEl = el('windDirLabel');
         if (labelEl && labelEl.textContent !== `Wind From: ${windDirLabel}`) {
-            labelEl.textContent = `Wind From: ${windDirLabel}`;
-            }
+          labelEl.textContent = `Wind From: ${windDirLabel}`;
+        }
         if (el('updated')) {
           const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
+        let windGust = null;
+        if (current?.wind_gusts_10m !== undefined && typeof current.wind_gusts_10m === 'number') {
+          windGust = current.wind_gusts_10m;
+          } else {
+            windGust = pickHourlyNearest('wind_gusts_10m') ?? daily?.maximum_wind_gusts_10m?.[0] ?? null;
+                }
+
+          if (el('windGust')) {
+            if (windGust !== null) {
+                el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
+                el('windGust').classList.remove('opacity-50');
+                el('windGust').setAttribute('title', '');
+          } else {
+                el('windGust').textContent = `Gusts: N/A`;
+                el('windGust').classList.add('opacity-50');
+                el('windGust').setAttribute('title', 'Wind gust data not available from Open-Meteo');
+                }
+                          }
 
         // Forecast strip (next 12 future hours)
         if (hourly && hourly.time && el('forecastStrip')) {
