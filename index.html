@@ -348,19 +348,24 @@
 
         const windDirLabel = degToCardinal(windDirDeg);
         const siteKey = normalizeCardinal(windDirLabel);
-      
-      if (el('windGust')) {
-        if (windGust !== null) {
-          el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
-          el('windGust').classList.remove('opacity-50');
-          el('windGust').setAttribute('title', '');
-      } else {
-          el('windGust').textContent = `Gusts: N/A`;
-          el('windGust').classList.add('opacity-50');
-          el('windGust').setAttribute('title', 'Wind gust data not available from Open-Meteo');
-          }
-        }
+        let windGust = null;
+        if (current?.wind_gusts_10m !== undefined && typeof current.wind_gusts_10m === 'number') {
+        windGust = current.wind_gusts_10m;
+          } else {
+        windGust = pickHourlyNearest('wind_gusts_10m') ?? data?.daily?.maximum_wind_gusts_10m?.[0] ?? null;
+            }
 
+        if (el('windGust')) {
+          if (windGust !== null) {
+            el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
+            el('windGust').classList.remove('opacity-50');
+            el('windGust').setAttribute('title', '');
+          } else {
+            el('windGust').textContent = `Gusts: N/A`;
+            el('windGust').classList.add('opacity-50');
+            el('windGust').setAttribute('title', 'Wind gust data not available from Open-Meteo');
+        }
+      }      
 
         if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
         if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
@@ -376,12 +381,6 @@
           const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
-        let windGust = null;
-        if (current?.wind_gusts_10m !== undefined && typeof current.wind_gusts_10m === 'number') {
-          windGust = current.wind_gusts_10m;
-          } else {
-            windGust = pickHourlyNearest('wind_gusts_10m') ?? daily?.maximum_wind_gusts_10m?.[0] ?? null;
-                }
 
         // Forecast strip (next 12 future hours)
         if (hourly && hourly.time && el('forecastStrip')) {
