@@ -390,18 +390,6 @@
             windGust = pickHourlyNearest('wind_gusts_10m') ?? daily?.maximum_wind_gusts_10m?.[0] ?? null;
                 }
 
-          if (el('windGust')) {
-            if (windGust !== null) {
-                el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`;
-                el('windGust').classList.remove('opacity-50');
-                el('windGust').setAttribute('title', '');
-          } else {
-                el('windGust').textContent = `Gusts: N/A`;
-                el('windGust').classList.add('opacity-50');
-                el('windGust').setAttribute('title', 'Wind gust data not available from Open-Meteo');
-                }
-                          }
-
         // Forecast strip (next 12 future hours)
         if (hourly && hourly.time && el('forecastStrip')) {
           const now = Date.now();
