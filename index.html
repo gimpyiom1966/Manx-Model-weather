@@ -320,13 +320,26 @@ function updateMapAndStreetView(cardinal) {
     embedIndexTracker[currentDir] = (embedIndexTracker[currentDir] + 1) % embeds.length;
     updateMapAndStreetView(currentDir);
   }
+const altBtn = document.getElementById('altSiteBtn');
+if (altBtn) altBtn.addEventListener('click', cycleStreetView);
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const altBtn = document.getElementById('altSiteBtn');
-    if (altBtn) {
-      altBtn.addEventListener('click', cycleStreetView);
-    }
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  setActiveRadar('windy'); // Default Windy on first load
+
+  // Wire radar toggle buttons
+  const bW = document.getElementById('btnWindy');
+  const bO = document.getElementById('btnOpenMeteo');
+  if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
+  if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
+
+  // ✅ Wire Alt Site button
+  const altBtn = document.getElementById('altSiteBtn');
+  if (altBtn) altBtn.addEventListener('click', cycleStreetView);
+
+  fetchAndUpdateWeather();
+  setInterval(fetchAndUpdateWeather, 300000);
+});
+
 </script>
 
   <!-- Weather fetch + UI updates + Radar toggle -->
