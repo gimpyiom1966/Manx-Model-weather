@@ -229,17 +229,35 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const markers = {
-      N:  [{ lat: 54.24, lng: -4.48, label: 'North Wind' }],
-      NE: [{ lat: 54.23, lng: -4.46, label: 'Windy Corner' }],
-      E:  [{ lat: 54.26, lng: -4.45, label: 'Verandah' }],
-      SE: [{ lat: 54.12, lng: -4.73, label: 'Sloth Road'],
-      S:  [{ lat: 54.24, lng: -4.51, label: 'Sheep Pens' }],
-      SW: [{ lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' }],
-      W:  [{ lat: 54.12, lng: -4.73, label: 'Stacks' }],
-      NW: [{ lat: 54.23, lng: -4.66, label: 'White Strand' }
-           { lat: 54.24, lng: -4.49, label: 'Stone Bridge' }]
-    };
+const markers = {
+  N: [
+    { lat: 54.24, lng: -4.48, label: 'North Wind — Site 1' },
+    { lat: 54.250, lng: -4.480, label: 'North Wind — Site 2' }
+  ],
+  NE: [
+    { lat: 54.23, lng: -4.46, label: 'Windy Corner — Site 1' }
+  ],
+  E: [
+    { lat: 54.26, lng: -4.45, label: 'Verandah — Site 1' }
+  ],
+  SE: [
+    { lat: 54.12, lng: -4.73, label: 'Sloth Road — Site 1' }
+  ],
+  S: [
+    { lat: 54.24, lng: -4.51, label: 'Sheep Pens — Site 1' }
+  ],
+  SW: [
+    { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott — Site 1' }
+  ],
+  W: [
+    { lat: 54.12, lng: -4.73, label: 'Stacks — Site 1' }
+  ],
+  NW: [
+    { lat: 54.233703, lng: -4.658244, label: 'White Strand' },
+    { lat: 54.245554, lng: -4.498349, label: 'Stone Bridge' }
+  ]
+};
+
 
     const streetViewEmbeds = {
       N:  ["https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469"],
@@ -281,21 +299,20 @@
       return map[label] || label;
     }
 
-function updateMapAndStreetView(cardinal) {
+    function updateMapAndStreetView(cardinal) {
   if (!cardinal) return;
   const key = normalizeCardinal(cardinal);
   const embeds = streetViewEmbeds[key];
   const index = embedIndexTracker[key] || 0;
-
   const frame = document.getElementById('streetFrame');
+
   if (embeds && embeds.length && frame) {
     frame.src = embeds[index];
     const streetLabel = document.getElementById('streetLabel');
-    if (streetLabel) streetLabel.textContent = `Street View: ${m?.label || key} (${index + 1}/${embeds.length})`;
-
+    if (streetLabel) streetLabel.textContent = `Street View: ${markers[key]?.[index]?.label || key} (${index + 1}/${embeds.length})`;
   }
 
-  // ✅ Update Flying Site Map marker
+  // Update Flying Site Map marker using the same index
   const m = markers[key]?.[index];
   if (m) {
     if (window._liveWindMarker) {
@@ -305,6 +322,7 @@ function updateMapAndStreetView(cardinal) {
     map.setView([m.lat, m.lng], 12, { animate: true });
   }
 }
+
 
   </script>
   
@@ -321,17 +339,25 @@ const altBtn = document.getElementById('altSiteBtn');
 if (altBtn) altBtn.addEventListener('click', cycleStreetView);
 
 document.addEventListener('DOMContentLoaded', () => {
-  setActiveRadar('windy'); // Default Windy on first load
+  setActiveRadar('windy');
+  // existing wiring...
+  fetchAndUpdateWeather();
+  setInterval(fetchAndUpdateWeather, 300000);
+});
 
+
+
+  
   // Wire radar toggle buttons
   const bW = document.getElementById('btnWindy');
   const bO = document.getElementById('btnOpenMeteo');
   if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
   if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
 
-  // ✅ Wire Alt Site button
-  const altBtn = document.getElementById('altSiteBtn');
-  if (altBtn) altBtn.addEventListener('click', cycleStreetView);
+// Wire Alt Site button
+const altBtn = document.getElementById('altSiteBtn');
+if (altBtn) altBtn.addEventListener('click', cycleStreetView);
+
 
   fetchAndUpdateWeather();
   setInterval(fetchAndUpdateWeather, 300000);
