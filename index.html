@@ -55,6 +55,14 @@
     transform: rotate(360deg);
   }
 }
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
+}
 
   </style>
 
@@ -167,11 +175,11 @@
           <section id="street-view" class="w-full bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
               <h2 id="streetLabel" class="text-2xl font-bold text-primary">Street View</h2>
-              <button id="altSiteBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-3 py-1 rounded-lg text-sm" title="Cycle alternate views for this wind direction">
-              Alt Site
-              </button>
-
-        </div>
+            <button id="altSiteBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-5 py-2 rounded-lg text-base font-semibold flex items-center gap-2" title="Cycle alternate views for this wind direction">
+            <span class="material-symbols-outlined animate-spin-slow">refresh</span>
+            Alt Site
+          </button>
+     </div>
         <div class="rounded-lg overflow-hidden shadow-inner" style="height:420px;">
           <iframe id="streetFrame" class="embed-full" title="Street View" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
