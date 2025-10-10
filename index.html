@@ -230,14 +230,23 @@
     }).addTo(map);
 
     const markers = {
-      N:  { lat: 54.24, lng: -4.48, label: 'North Wind' },
-      NE: { lat: 54.23, lng: -4.46, label: 'Windy Corner' },
-      E:  { lat: 54.26, lng: -4.45, label: 'Verandah' },
-      SE: { lat: 54.12, lng: -4.73, label: 'Sloth Road' },
-      S:  { lat: 54.24, lng: -4.51, label: 'Sheep Pens' },
-      SW: { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' },
-      W:  { lat: 54.12, lng: -4.73, label: 'Stacks' },
-      NW: { lat: 54.23, lng: -4.66, label: 'White Strand' }
+      N:  [{ lat: 54.24, lng: -4.48, label: 'North Wind' }
+          ],
+      NE: [{ lat: 54.23, lng: -4.46, label: 'Windy Corner' }
+          ],
+      E:  [{ lat: 54.26, lng: -4.45, label: 'Verandah' }
+          ],
+      SE: [{ lat: 54.12, lng: -4.73, label: 'Sloth Road' }
+          ],
+      S:  [{ lat: 54.24, lng: -4.51, label: 'Sheep Pens' }
+          ],
+      SW: [{ lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' }
+          ],
+      W:  [{ lat: 54.12, lng: -4.73, label: 'Stacks' }
+          ],
+      NW: [{ lat: 54.23, lng: -4.66, label: 'White Strand' }
+           { lat: 54.24, lng: -4.49, label: 'Stone Bridge' }
+          ]
     };
 
     const streetViewEmbeds = {
