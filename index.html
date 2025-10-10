@@ -478,16 +478,15 @@ if (altBtn) altBtn.addEventListener('click', cycleStreetView);
         if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
         if (el('humidity') && humidity !== null) el('humidity').textContent = `${Math.round(humidity)}%`;
         if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
-        if (el('windGust') && windDirDeg !== null)
-                el('windGust').insertAdjacentHTML('afterend',
-                `<p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Direction: ${Math.round(windDirDeg)}°</p>`);
+
         const labelEl = el('windDirLabel');
         if (labelEl && labelEl.textContent !== `Wind From: ${windDirLabel}`) {
           labelEl.textContent = `Wind From: ${windDirLabel}`;
         }
-        if (el('windDirDegrees') && windDirDeg !== null) {
-            el('windDirDegrees').textContent = `Direct: ${Math.round(windDirDeg)}°`;
-            }
+      if (el('windDirDegrees') && windDirDeg !== null) {
+        el('windDirDegrees').textContent = `Direction: ${Math.round(windDirDeg)}°`;
+        }
+
 
         if (el('updated')) {
           const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
