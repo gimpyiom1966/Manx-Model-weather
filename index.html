@@ -281,18 +281,25 @@
     }
 
 function updateMapAndStreetView(cardinal) {
-  if (!cardinal) return;
   const key = normalizeCardinal(cardinal);
   const embeds = streetViewEmbeds[key];
   const index = embedIndexTracker[key] || 0;
-
   const frame = document.getElementById('streetFrame');
-  if (embeds && embeds.length && frame) {
-    frame.src = embeds[index];
-    const streetLabel = document.getElementById('streetLabel');
-    if (streetLabel) streetLabel.textContent = `Street View: ${markers[key]?.label || key} (${index + 1}/${embeds.length})`;
+  const wrapper = document.getElementById('streetFrameWrapper');
+
+  if (embeds && embeds.length && frame && wrapper) {
+    wrapper.style.opacity = '0';
+    setTimeout(() => {
+      frame.src = embeds[index];
+      wrapper.style.opacity = '1';
+    }, 300);
   }
-     // Optional: update map marker
+
+  const streetLabel = document.getElementById('streetLabel');
+  if (streetLabel) {
+    streetLabel.textContent = `Street View: ${markers[key]?.label || key} (${index + 1}/${embeds.length})`;
+  }
+
   const m = markers[key];
   if (m) {
     if (window._liveWindMarker) {
@@ -301,8 +308,26 @@ function updateMapAndStreetView(cardinal) {
     window._liveWindMarker = L.marker([m.lat, m.lng]).addTo(map).bindPopup(m.label).openPopup();
     map.setView([m.lat, m.lng], 12, { animate: true });
   }
-} 
+}
   </script>
+  
+<script>
+  function cycleStreetView() {
+    const currentDir = normalizeCardinal(document.getElementById('windDirLabel')?.textContent?.split(': ')[1]);
+    const embeds = streetViewEmbeds[currentDir];
+    if (!embeds || !embeds.length) return;
+
+    embedIndexTracker[currentDir] = (embedIndexTracker[currentDir] + 1) % embeds.length;
+    updateMapAndStreetView(currentDir);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const altBtn = document.getElementById('altSiteBtn');
+    if (altBtn) {
+      altBtn.addEventListener('click', cycleStreetView);
+    }
+  });
+</script>
 
   <!-- Weather fetch + UI updates + Radar toggle -->
   <script>
