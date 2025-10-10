@@ -290,26 +290,20 @@
     }
 
 function updateMapAndStreetView(cardinal) {
+  if (!cardinal) return;
   const key = normalizeCardinal(cardinal);
   const embeds = streetViewEmbeds[key];
   const index = embedIndexTracker[key] || 0;
+
   const frame = document.getElementById('streetFrame');
-  const wrapper = document.getElementById('streetFrameWrapper');
-
-  if (embeds && embeds.length && frame && wrapper) {
-    wrapper.style.opacity = '0';
-    setTimeout(() => {
-      frame.src = embeds[index];
-      wrapper.style.opacity = '1';
-    }, 300);
+  if (embeds && embeds.length && frame) {
+    frame.src = embeds[index];
+    const streetLabel = document.getElementById('streetLabel');
+    if (streetLabel) streetLabel.textContent = `Street View: ${markers[key]?.[index]?.label || key} (${index + 1}/${embeds.length})`;
   }
 
-  const streetLabel = document.getElementById('streetLabel');
-  if (streetLabel) {
-    streetLabel.textContent = `Street View: ${markers[key]?.label || key} (${index + 1}/${embeds.length})`;
-  }
-
-  const m = markers[key];
+  // ✅ Update Flying Site Map marker
+  const m = markers[key]?.[index];
   if (m) {
     if (window._liveWindMarker) {
       try { window._liveWindMarker.remove(); } catch (e) {}
@@ -318,6 +312,7 @@ function updateMapAndStreetView(cardinal) {
     map.setView([m.lat, m.lng], 12, { animate: true });
   }
 }
+
   </script>
   
 <script>
