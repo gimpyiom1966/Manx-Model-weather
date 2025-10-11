@@ -654,7 +654,7 @@ picsBtn.appendChild(document.createTextNode(streetViewMode === 'pictures' ? ' St
       updateMapAndStreetView(currentDir);
       }
 
-    // Boot
+    // Boot DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
   setActiveRadar('windy');
 
@@ -663,10 +663,32 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
   if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
 
-  // Wire Alt Site button
-  const altBtn = document.getElementById('altSiteBtn');
-  if (altBtn) altBtn.addEventListener('click', cycleStreetView);
+// Wire Alt Site button
+const altBtn = document.getElementById('altSiteBtn');
+if (altBtn) altBtn.addEventListener('click', cycleStreetView);
 
+// Wire Pictures toggle (safe, id exists by DOMContentLoaded)
+const picsBtn = document.getElementById('picturesBtn');
+if (picsBtn) {
+  picsBtn.addEventListener('click', () => {
+    // toggle mode
+    streetViewMode = (streetViewMode === 'pictures') ? 'street' : 'pictures';
+
+    // build icon for new state
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined';
+    icon.textContent = (streetViewMode === 'pictures') ? 'tour' : 'photo_library';
+
+    // replace button contents cleanly
+    while (picsBtn.firstChild) picsBtn.removeChild(picsBtn.firstChild);
+    picsBtn.appendChild(icon);
+    picsBtn.appendChild(document.createTextNode(streetViewMode === 'pictures' ? ' Street View' : ' Pictures'));
+
+    // refresh view for current wind direction
+    const currentDir = normalizeCardinal(document.getElementById('windDirLabel')?.textContent?.split(': ')[1]);
+    updateMapAndStreetView(currentDir);
+  });
+}
   fetchAndUpdateWeather();
   setInterval(fetchAndUpdateWeather, 300000);
 });
