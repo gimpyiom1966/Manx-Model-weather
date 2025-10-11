@@ -35,6 +35,16 @@
         },
       },
     };
+
+    #streetFrameWrapper img.site-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border: 0;
+}
+.fade-hidden { opacity: 0; }
+
   </script>
 
   <style>
@@ -171,19 +181,31 @@
               </div>
             </div>
           </section>
+    <!-- Street View -->
+<section id="street-view" class="w-full bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+  <div class="flex items-center justify-between mb-4">
+    <h2 id="streetLabel" class="text-2xl font-bold text-primary">Street View</h2>
 
-          <!-- Street View -->
-          <section id="street-view" class="w-full bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-              <h2 id="streetLabel" class="text-2xl font-bold text-primary">Street View</h2>
-            <button id="altSiteBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-5 py-2 rounded-lg text-base font-semibold flex items-center gap-2" title="Cycle alternate views for this wind direction">
-            <span class="material-symbols-outlined animate-spin-slow">refresh</span>
-            Alt Site
-          </button>
-     </div>
-          <div id="streetFrameWrapper" class="rounded-lg overflow-hidden shadow-inner transition-opacity duration-500 opacity-100" style="height:420px;">
-          <iframe id="streetFrame" class="embed-full" title="Street View" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      </div>
+    <div class="flex items-center gap-3">
+      <button id="picturesBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-4 py-2 rounded-lg text-base font-semibold flex items-center gap-2" title="Show photos for this wind direction">
+        <span class="material-symbols-outlined">photo_library</span>
+        Pictures
+      </button>
+
+      <button id="altSiteBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-5 py-2 rounded-lg text-base font-semibold flex items-center gap-2" title="Cycle alternate views for this wind direction">
+        <span class="material-symbols-outlined animate-spin-slow">refresh</span>
+        Alt Site
+      </button>
+    </div>
+  </div>
+
+  <div id="streetFrameWrapper" class="rounded-lg overflow-hidden shadow-inner transition-opacity duration-500 opacity-100" style="height:420px;">
+    <!-- The view content is injected here (iframe or img) -->
+    <iframe id="streetFrame" class="embed-full" title="Street View" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+</section>
+
+
 
         </section>
 
@@ -303,22 +325,86 @@ const markers = {
       };
       return map[label] || label;
     }
+// -- Photos per direction: PNG/JPG arrays (add real URLs to your repo or CDN)
+const sitePhotos = {
+  N: [
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/N-site-1.png",
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/N-site-2.png"
+  ],
+  NE: [
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NE-site-1.png"
+  ],
+  E: [
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/E-site-1.png"
+  ],
+  SE: [],
+  S: [],
+  SW: [],
+  W: [],
+  NW: [
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NW-site-1.png",
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NW-site-2.png"
+  ]
+};
 
+// current display mode: 'street' or 'pictures'
+let streetViewMode = 'street';
+
+// helper to set view content (iframe or image) with fade
+function setStreetViewContent({ type = 'iframe', src = '', index = 0, total = 1 } = {}) {
+  const wrapper = document.getElementById('streetFrameWrapper');
+  if (!wrapper) return;
+
+  wrapper.classList.add('fade-hidden');
+  setTimeout(() => {
+    // clear wrapper
+    wrapper.innerHTML = '';
+
+    if (type === 'iframe') {
+      const iframe = document.createElement('iframe');
+      iframe.id = 'streetFrame';
+      iframe.className = 'embed-full';
+      iframe.title = 'Street View';
+      iframe.loading = 'lazy';
+      iframe.referrerPolicy = 'no-referrer-when-downgrade';
+      iframe.src = src || '';
+      wrapper.appendChild(iframe);
+    } else if (type === 'img') {
+      const img = document.createElement('img');
+      img.className = 'site-photo';
+      img.alt = `Site photo ${index + 1} of ${total}`;
+      img.src = src || '';
+      wrapper.appendChild(img);
+    }
+
+    wrapper.classList.remove('fade-hidden');
+  }, 250);
+}
+
+    
 function updateMapAndStreetView(cardinal) {
   if (!cardinal) return;
   const key = normalizeCardinal(cardinal);
-  const embeds = streetViewEmbeds[key];
+  const embeds = streetViewEmbeds[key] || [];
+  const photos = sitePhotos[key] || [];
   const index = embedIndexTracker[key] || 0;
-  const frame = document.getElementById('streetFrame');
 
-  if (embeds && embeds.length && frame) {
-    frame.src = embeds[index];
+  // Decide what to show
+  if (streetViewMode === 'pictures' && photos.length) {
+    const photoSrc = photos[index % photos.length];
+    setStreetViewContent({ type: 'img', src: photoSrc, index, total: photos.length });
     const streetLabel = document.getElementById('streetLabel');
-    if (streetLabel) streetLabel.textContent = `Street View: ${markers[key]?.[index]?.label || key} (${index + 1}/${embeds.length})`;
+    if (streetLabel) streetLabel.textContent = `Pictures: ${markers[key]?.[index]?.label || key} (${(index % photos.length) + 1}/${photos.length})`;
+  } else {
+    // fallback to iframe street view
+    const embedSrc = embeds.length ? embeds[index % embeds.length] : '';
+    setStreetViewContent({ type: 'iframe', src: embedSrc, index, total: embeds.length || 1 });
+    const streetLabel = document.getElementById('streetLabel');
+    if (streetLabel) streetLabel.textContent = `Street View: ${markers[key]?.[index]?.label || key} (${(index % (embeds.length || 1)) + 1}/${embeds.length || 1})`;
   }
 
   // Update Flying Site Map marker using the same index
-  const m = markers[key]?.[index];
+  const m = markers[key]?.[index] || markers[key];
   if (m) {
     if (window._liveWindMarker) {
       try { window._liveWindMarker.remove(); } catch (e) {}
@@ -327,19 +413,22 @@ function updateMapAndStreetView(cardinal) {
     map.setView([m.lat, m.lng], 12, { animate: true });
   }
 }
-
-
   </script>
   
 <script>
-  function cycleStreetView() {
-    const currentDir = normalizeCardinal(document.getElementById('windDirLabel')?.textContent?.split(': ')[1]);
-    const embeds = streetViewEmbeds[currentDir];
-    if (!embeds || !embeds.length) return;
+function cycleStreetView() {
+  const currentDir = normalizeCardinal(document.getElementById('windDirLabel')?.textContent?.split(': ')[1]);
+  if (!currentDir) return;
 
-    embedIndexTracker[currentDir] = (embedIndexTracker[currentDir] + 1) % embeds.length;
-    updateMapAndStreetView(currentDir);
-  }
+  const embeds = streetViewEmbeds[currentDir] || [];
+  const photos = sitePhotos[currentDir] || [];
+  const length = (streetViewMode === 'pictures' && photos.length) ? photos.length : (embeds.length || 0);
+  if (!length) return;
+
+  embedIndexTracker[currentDir] = (embedIndexTracker[currentDir] + 1) % length;
+  updateMapAndStreetView(currentDir);
+}
+
 const altBtn = document.getElementById('altSiteBtn');
 if (altBtn) altBtn.addEventListener('click', cycleStreetView);
 
@@ -348,11 +437,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // existing wiring...
   fetchAndUpdateWeather();
   setInterval(fetchAndUpdateWeather, 300000);
+  
 });
 
-
-
-  
+ 
   // Wire radar toggle buttons
   const bW = document.getElementById('btnWindy');
   const bO = document.getElementById('btnOpenMeteo');
@@ -363,7 +451,31 @@ document.addEventListener('DOMContentLoaded', () => {
 const altBtn = document.getElementById('altSiteBtn');
 if (altBtn) altBtn.addEventListener('click', cycleStreetView);
 
+// Wire Pictures toggle
+const picsBtn = document.getElementById('picturesBtn');
+if (picsBtn) {
+  picsBtn.addEventListener('click', () => {
+    // toggle mode
+    streetViewMode = (streetViewMode === 'pictures') ? 'street' : 'pictures';
 
+    // update button text to show opposite action
+    picsBtn.textContent = (streetViewMode === 'pictures') ? 'Street View' : 'Pictures';
+    // optionally re-add the icon span when toggling
+// create the icon element for the new state
+const icon = document.createElement('span');
+icon.className = 'material-symbols-outlined';
+icon.textContent = (streetViewMode === 'pictures') ? 'tour' : 'photo_library';
+
+// remove any existing children before adding fresh icon + label
+while (picsBtn.firstChild) picsBtn.removeChild(picsBtn.firstChild);
+picsBtn.appendChild(icon);
+picsBtn.appendChild(document.createTextNode(streetViewMode === 'pictures' ? ' Street View' : ' Pictures'));
+
+    // refresh view for current wind direction
+    const currentDir = normalizeCardinal(document.getElementById('windDirLabel')?.textContent?.split(': ')[1]);
+    updateMapAndStreetView(currentDir);
+  });
+}
   fetchAndUpdateWeather();
   setInterval(fetchAndUpdateWeather, 300000);
 });
