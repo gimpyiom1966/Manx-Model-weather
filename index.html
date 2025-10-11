@@ -43,7 +43,12 @@
   display: block;
   border: 0;
 }
-.fade-hidden { opacity: 0; }
+<style>
+  /* Ensure the wrapper fades smoothly and is never interactive while hidden */
+  #streetFrameWrapper { transition: opacity 300ms ease; opacity: 1; }
+  .fade-hidden { opacity: 0 !important; pointer-events: none; }
+</style>
+
 
   </script>
 
@@ -244,122 +249,80 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <!-- Map + Street View helpers -->
-  <script>
-    // Initialize Leaflet map
-    const map = L.map('wind-map', { preferCanvas: true }).setView([54.236, -4.495], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+<script>
+/* ===== Map + Street View helpers (consolidated patch) ===== */
 
+/* Initialize Leaflet map */
+const map = L.map('wind-map', { preferCanvas: true }).setView([54.236, -4.495], 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+
+/* Markers (arrays per direction) */
 const markers = {
-  N: [
-    { lat: 54.24, lng: -4.48, label: 'North Wind — Site 1' }
-  ],
-  NE: [
-    { lat: 54.23, lng: -4.46, label: 'Windy Corner — Site 1' }
-  ],
-  E: [
-    { lat: 54.26, lng: -4.45, label: 'Verandah — Site 1' }
-  ],
-  SE: [
-    { lat: 54.12, lng: -4.73, label: 'Sloth Road — Site 1' }
-  ],
-  S: [
-    { lat: 54.24, lng: -4.51, label: 'Sheep Pens — Site 1' }
-  ],
-  SW: [
-    { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott — Site 1' }
-  ],
+  N: [ { lat: 54.24, lng: -4.48, label: 'North Wind — Site 1' } ],
+  NE: [ { lat: 54.23, lng: -4.46, label: 'Windy Corner — Site 1' } ],
+  E: [ { lat: 54.26, lng: -4.45, label: 'Verandah — Site 1' } ],
+  SE: [ { lat: 54.12, lng: -4.73, label: 'Sloth Road — Site 1' } ],
+  S: [ { lat: 54.24, lng: -4.51, label: 'Sheep Pens — Site 1' } ],
+  SW: [ { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott — Site 1' } ],
+  W: [ { lat: 54.12, lng: -4.73, label: 'Stacks — Site 1' }, { lat: 54.24, lng: -4.54, label: 'Stone Bridge — Site 2' } ],
+  NW: [ { lat: 54.233703, lng: -4.658244, label: 'White Strand — Site 1' }, { lat: 54.245554, lng: -4.498349, label: 'White Strand — Site 2' } ]
+};
+
+/* Street view embeds (arrays per direction) */
+const streetViewEmbeds = {
+  N: ["https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469"],
+  NE: ["https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469"],
+  E: ["https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.94!4f-2.03!5f0.7820865974627469"],
+  SE: ["https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469"],
+  S: ["https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469"],
+  SW: ["https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.63!4f-1.10!5f0.400000000000000"],
   W: [
-    { lat: 54.12, lng: -4.73, label: 'Stacks — Site 1' },
-    { lat: 54.24, lng: -4.54, label: 'Stone Bridge - Site 2' }
+    "https://www.google.com/maps/embed?pb=!4v1759922941173!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f284.8373448827164!4f0.8266827177191516!5f0.7820865974627469",
+    "https://www.google.com/maps/embed?pb=!4v1760132659584!6m8!1m7!1sVSNjuCmXLL1dkzzsEwizHQ!2m2!1d54.24846832953868!2d-4.545133461494111!3f202.5766132355337!4f-10.737361959927355!5f0.7820865974627469"
   ],
   NW: [
-    { lat: 54.233703, lng: -4.658244, label: 'White Strand — Site 1' },
-    { lat: 54.245554, lng: -4.498349, label: 'White Strand — Site 2' }
+    "https://www.google.com/maps/embed?pb=!4v1760124117236!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJRE94S3VwN0FF!2m2!1d54.23370346113064!2d-4.658243884271213!3f272.0339775179602!4f-13.718213270304986!5f0.7820865974627469",
+    "https://www.google.com/maps/embed?pb=!4v1760125681149!6m8!1m7!1s-1_H9Wq-qTv0o8i04Ai8Qw!2m2!1d54.24555449571505!2d-4.498349202388866!3f324.36695324494!4f-12.896896978147822!5f0.7820865974627469"
   ]
 };
 
+/* Index tracker per direction */
+const embedIndexTracker = { N:0, NE:0, E:0, SE:0, S:0, SW:0, W:0, NW:0 };
 
+/* Normalize cardinal mapping */
+function normalizeCardinal(label) {
+  const map = { N:'N', NNE:'N', NNW:'N', NE:'NE', ENE:'NE', E:'E', ESE:'E', SE:'SE', SSE:'SE', S:'S', SSW:'S', SW:'SW', WSW:'SW', W:'W', WNW:'W', NW:'NW' };
+  return map[label] || label;
+}
 
-    const streetViewEmbeds = {
-      N:  ["https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469"],
-      NE: ["https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469"],
-      E:  ["https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.94!4f-2.03!5f0.7820865974627469"],
-      SE: ["https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469"],
-      S:  ["https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469"],
-      SW: ["https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.63!4f-1.10!5f0.400000000000000"],
-      W: [
-         "https://www.google.com/maps/embed?pb=!4v1759922941173!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f284.8373448827164!4f0.8266827177191516!5f0.7820865974627469",
-         "https://www.google.com/maps/embed?pb=!4v1760132659584!6m8!1m7!1sVSNjuCmXLL1dkzzsEwizHQ!2m2!1d54.24846832953868!2d-4.545133461494111!3f202.5766132355337!4f-10.737361959927355!5f0.7820865974627469"
-      ], 
-      NW: [
-          "https://www.google.com/maps/embed?pb=!4v1760124117236!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJRE94S3VwN0FF!2m2!1d54.23370346113064!2d-4.658243884271213!3f272.0339775179602!4f-13.718213270304986!5f0.7820865974627469",
-          "https://www.google.com/maps/embed?pb=!4v1760125681149!6m8!1m7!1s-1_H9Wq-qTv0o8i04Ai8Qw!2m2!1d54.24555449571505!2d-4.498349202388866!3f324.36695324494!4f-12.896896978147822!5f0.7820865974627469"
-      ]
-           };
-
-    const embedIndexTracker = {
-  N: 0,
-  NE: 0,
-  E: 0,
-  SE: 0,
-  S: 0,
-  SW: 0,
-  W: 0,
-  NW: 0
-};
-
-
-    function normalizeCardinal(label) {
-      const map = {
-        N:'N', NNE:'N', NNW:'N',
-        NE:'NE', ENE:'NE',
-        E:'E', ESE:'E',
-        SE:'SE', SSE:'SE',
-        S:'S', SSW:'S',
-        SW:'SW', WSW:'SW',
-        W:'W', WNW:'W',
-        NW:'NW'
-      };
-      return map[label] || label;
-    }
-// -- Photos per direction: PNG/JPG arrays (add real URLs to your repo or CDN)
+/* Photos per direction (update URLs to files you've uploaded) */
 const sitePhotos = {
   N: [
     "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/N-site-1.png",
     "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/N-site-2.png"
   ],
-  NE: [
-    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NE-site-1.png"
-  ],
-  E: [
-    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/E-site-1.png"
-  ],
-  SE: [],
-  S: [],
-  SW: [],
-  W: [],
+  NE: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NE-site-1.png"],
+  E: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/E-site-1.png"],
+  SE: [], S: [], SW: [], W: [], 
   NW: [
     "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NW-site-1.png",
     "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NW-site-2.png"
   ]
 };
 
-// current display mode: 'street' or 'pictures'
+/* current display mode: 'street' or 'pictures' */
 let streetViewMode = 'street';
 
-// helper to set view content (iframe or image) with fade
-function setStreetViewContent({ type = 'iframe', src = '', index = 0, total = 1 } = {}) {
-  const wrapper = document.getElementById('streetFrameWrapper');
-  if (!wrapper) return;
+/* helper: safely get element */
+function el(id) { return document.getElementById(id); }
 
+/* helper: set the content of the wrapper with fade */
+function setStreetViewContent({ type = 'iframe', src = '', index = 0, total = 1 } = {}) {
+  const wrapper = el('streetFrameWrapper');
+  if (!wrapper) return;
   wrapper.classList.add('fade-hidden');
   setTimeout(() => {
-    // clear wrapper
     wrapper.innerHTML = '';
-
     if (type === 'iframe') {
       const iframe = document.createElement('iframe');
       iframe.id = 'streetFrame';
@@ -369,19 +332,18 @@ function setStreetViewContent({ type = 'iframe', src = '', index = 0, total = 1 
       iframe.referrerPolicy = 'no-referrer-when-downgrade';
       iframe.src = src || '';
       wrapper.appendChild(iframe);
-    } else if (type === 'img') {
+    } else {
       const img = document.createElement('img');
       img.className = 'site-photo';
       img.alt = `Site photo ${index + 1} of ${total}`;
       img.src = src || '';
       wrapper.appendChild(img);
     }
-
     wrapper.classList.remove('fade-hidden');
-  }, 250);
+  }, 220);
 }
 
-    
+/* update map marker and street/picture display */
 function updateMapAndStreetView(cardinal) {
   if (!cardinal) return;
   const key = normalizeCardinal(cardinal);
@@ -389,22 +351,19 @@ function updateMapAndStreetView(cardinal) {
   const photos = sitePhotos[key] || [];
   const index = embedIndexTracker[key] || 0;
 
-  // Decide what to show
   if (streetViewMode === 'pictures' && photos.length) {
     const photoSrc = photos[index % photos.length];
     setStreetViewContent({ type: 'img', src: photoSrc, index, total: photos.length });
-    const streetLabel = document.getElementById('streetLabel');
+    const streetLabel = el('streetLabel');
     if (streetLabel) streetLabel.textContent = `Pictures: ${markers[key]?.[index]?.label || key} (${(index % photos.length) + 1}/${photos.length})`;
   } else {
-    // fallback to iframe street view
     const embedSrc = embeds.length ? embeds[index % embeds.length] : '';
     setStreetViewContent({ type: 'iframe', src: embedSrc, index, total: embeds.length || 1 });
-    const streetLabel = document.getElementById('streetLabel');
+    const streetLabel = el('streetLabel');
     if (streetLabel) streetLabel.textContent = `Street View: ${markers[key]?.[index]?.label || key} (${(index % (embeds.length || 1)) + 1}/${embeds.length || 1})`;
   }
 
-  // Update Flying Site Map marker using the same index
-  const m = markers[key]?.[index] || markers[key];
+  const m = markers[key]?.[index];
   if (m) {
     if (window._liveWindMarker) {
       try { window._liveWindMarker.remove(); } catch (e) {}
@@ -413,72 +372,79 @@ function updateMapAndStreetView(cardinal) {
     map.setView([m.lat, m.lng], 12, { animate: true });
   }
 }
-  </script>
-  
-<script>
-function cycleStreetView() {
-  const currentDir = normalizeCardinal(document.getElementById('windDirLabel')?.textContent?.split(': ')[1]);
-  if (!currentDir) return;
 
+/* cycle alt site (advances depending on current mode) */
+function cycleStreetView() {
+  const lbl = el('windDirLabel')?.textContent || '';
+  const currentDir = normalizeCardinal(lbl.split(': ')[1]);
+  if (!currentDir) return;
   const embeds = streetViewEmbeds[currentDir] || [];
   const photos = sitePhotos[currentDir] || [];
   const length = (streetViewMode === 'pictures' && photos.length) ? photos.length : (embeds.length || 0);
   if (!length) return;
-
   embedIndexTracker[currentDir] = (embedIndexTracker[currentDir] + 1) % length;
   updateMapAndStreetView(currentDir);
 }
 
-const altBtn = document.getElementById('altSiteBtn');
-if (altBtn) altBtn.addEventListener('click', cycleStreetView);
+/* ensure wrapper has initial frame if missing */
+(function ensureInitialStreetView() {
+  const wrapper = el('streetFrameWrapper');
+  if (!wrapper) return;
+  if (!wrapper.querySelector('iframe') && !wrapper.querySelector('img')) {
+    const iframe = document.createElement('iframe');
+    iframe.id = 'streetFrame';
+    iframe.className = 'embed-full';
+    iframe.title = 'Street View';
+    iframe.loading = 'lazy';
+    iframe.referrerPolicy = 'no-referrer-when-downgrade';
+    iframe.src = '';
+    wrapper.appendChild(iframe);
+  }
+})();
 
+/* SINGLE DOMContentLoaded wiring for buttons and initial render */
 document.addEventListener('DOMContentLoaded', () => {
-  setActiveRadar('windy');
-  // existing wiring...
-  fetchAndUpdateWeather();
-  setInterval(fetchAndUpdateWeather, 300000);
-  
-});
+  // Radar defaults (existing function defined elsewhere)
+  if (typeof setActiveRadar === 'function') setActiveRadar('windy');
 
- 
-  // Wire radar toggle buttons
-  const bW = document.getElementById('btnWindy');
-  const bO = document.getElementById('btnOpenMeteo');
+  // Radar toggle buttons (if present)
+  const bW = el('btnWindy'), bO = el('btnOpenMeteo');
   if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
   if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
 
-// Wire Alt Site button
-const altBtn = document.getElementById('altSiteBtn');
-if (altBtn) altBtn.addEventListener('click', cycleStreetView);
+  // Alt Site button
+  const altBtn = el('altSiteBtn');
+  if (altBtn) altBtn.addEventListener('click', cycleStreetView);
 
-// Wire Pictures toggle
-const picsBtn = document.getElementById('picturesBtn');
-if (picsBtn) {
-  picsBtn.addEventListener('click', () => {
-    // toggle mode
-    streetViewMode = (streetViewMode === 'pictures') ? 'street' : 'pictures';
+  // Pictures toggle button
+  const picsBtn = el('picturesBtn');
+  if (picsBtn) {
+    // ensure initial compact icon+text state
+    function renderPicsBtn() {
+      const icon = document.createElement('span');
+      icon.className = 'material-symbols-outlined';
+      icon.textContent = (streetViewMode === 'pictures') ? 'tour' : 'photo_library';
+      while (picsBtn.firstChild) picsBtn.removeChild(picsBtn.firstChild);
+      picsBtn.appendChild(icon);
+      picsBtn.appendChild(document.createTextNode(streetViewMode === 'pictures' ? ' Street View' : ' Pictures'));
+    }
+    renderPicsBtn();
 
-    // update button text to show opposite action
-    picsBtn.textContent = (streetViewMode === 'pictures') ? 'Street View' : 'Pictures';
-    // optionally re-add the icon span when toggling
-// create the icon element for the new state
-const icon = document.createElement('span');
-icon.className = 'material-symbols-outlined';
-icon.textContent = (streetViewMode === 'pictures') ? 'tour' : 'photo_library';
+    picsBtn.addEventListener('click', () => {
+      streetViewMode = (streetViewMode === 'pictures') ? 'street' : 'pictures';
+      renderPicsBtn();
+      const lbl = el('windDirLabel')?.textContent || '';
+      const currentDir = normalizeCardinal(lbl.split(': ')[1]) || 'NW';
+      updateMapAndStreetView(currentDir);
+    });
+  }
 
-// remove any existing children before adding fresh icon + label
-while (picsBtn.firstChild) picsBtn.removeChild(picsBtn.firstChild);
-picsBtn.appendChild(icon);
-picsBtn.appendChild(document.createTextNode(streetViewMode === 'pictures' ? ' Street View' : ' Pictures'));
-
-    // refresh view for current wind direction
-    const currentDir = normalizeCardinal(document.getElementById('windDirLabel')?.textContent?.split(': ')[1]);
-    updateMapAndStreetView(currentDir);
-  });
-}
-  fetchAndUpdateWeather();
-  setInterval(fetchAndUpdateWeather, 300000);
+  // Trigger initial update (use current wind label or fallback to NW)
+  const initialDir = normalizeCardinal(el('windDirLabel')?.textContent?.split(': ')[1]) || 'NW';
+  updateMapAndStreetView(initialDir);
 });
+</script>
+
 
 </script>
 
