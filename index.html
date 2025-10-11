@@ -35,31 +35,26 @@
         },
       },
     };
-
-<style>
-  /* Ensure the wrapper fades smoothly and is never interactive while hidden */
-  #streetFrameWrapper { transition: opacity 300ms ease; opacity: 1; }
-  .fade-hidden { opacity: 0 !important; pointer-events: none; }
-
-  /* Image fit inside wrapper */
-  #streetFrameWrapper img.site-photo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    border: 0;
-  }
-
-  /* Slow spin for Alt Site icon (if used) */
-  @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  .animate-spin-slow { animation: spin-slow 2s linear infinite; }
-</style>
-
-
-
   </script>
 
   <style>
+    /* Ensure the wrapper fades smoothly and is never interactive while hidden */
+    #streetFrameWrapper { transition: opacity 300ms ease; opacity: 1; }
+    .fade-hidden { opacity: 0 !important; pointer-events: none; }
+
+    /* Image fit inside wrapper */
+    #streetFrameWrapper img.site-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border: 0;
+    }
+
+    /* Slow spin for Alt Site icon */
+    @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin-slow { animation: spin-slow 2s linear infinite; }
+
     .compass-dial { transform: rotate(var(--wind-direction, 0deg)); transition: transform 600ms ease; }
     .temp-change { animation: pulse 2s infinite alternate ease-in-out; }
     @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
@@ -69,24 +64,8 @@
     .toggle-btn { padding: 6px 10px; border-radius: 8px; cursor: pointer; }
     .toggle-active { background-color: rgba(0,160,160,1); color: white; }
     .toggle-inactive { background-color: rgba(0,0,0,0.06); color: inherit; }
-    @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 2s linear infinite;
-}
-
   </style>
+
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
@@ -447,11 +426,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-
-
-
-
-
   <!-- Weather fetch + UI updates + Radar toggle -->
   <script>
     const LAT = 54.236;
@@ -476,8 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return dirs[idx];
     }
 
-    function el(id) { return document.getElementById(id); }
-
+    
   function applyCompassRotation(windDeg) {
     if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
     const angle = ((windDeg % 360) + 360) % 360;
@@ -614,15 +587,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    //cycle street view code 
-    function cycleStreetView() {
-      const currentDir = normalizeCardinal(document.getElementById('windDirLabel')?.textContent?.split(': ')[1]);
-      const embeds = streetViewEmbeds[currentDir];
-        if (!embeds || !embeds.length) return;
-
-        embedIndexTracker[currentDir] = (embedIndexTracker[currentDir] + 1) % embeds.length;
-      updateMapAndStreetView(currentDir);
-      }
 
     // Boot DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
