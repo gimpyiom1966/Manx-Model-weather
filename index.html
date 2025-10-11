@@ -245,7 +245,8 @@ if (typeof L !== 'undefined' && el('wind-map')) {
 
 /* markers (arrays per direction) */
 const markers = {
-  N: [ { lat: 54.24, lng: -4.48, label: 'B10 - Peat' } ],
+  N: [ { lat: 54.24, lng: -4.48, label: 'B10 - Peat' },
+     { lat: 54.297, lng: -4.40, label: 'A18 Guthrie's' }],
   NE: [ { lat: 54.23, lng: -4.46, label: 'Windy Corner' } ],
   E: [ { lat: 54.26, lng: -4.45, label: 'Verandah' } ],
   SE: [ { lat: 54.12, lng: -4.73, label: 'Sloth Road' } ],
@@ -257,7 +258,8 @@ const markers = {
 
 /* street view embeds (arrays per direction) */
 const streetViewEmbeds = {
-  N: ["https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469"],
+  N: ["https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469",
+     "https://www.google.com/maps/embed?pb=!4v1760220624269!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJQ2VzNlgzOXdF!2m2!1d54.29606194833144!2d-4.404945039023309!3f334.5656291501481!4f7.428322536462105!5f0.7820865974627469"],
   NE: ["https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469"],
   E: ["https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.94!4f-2.03!5f0.7820865974627469"],
   SE: ["https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469"],
@@ -274,17 +276,17 @@ const streetViewEmbeds = {
 /* photos per direction (update URLs once you upload files) */
 const sitePhotos = {
   N: [
-    "https://github.com/gimpyiom1966/Manx-Model-weather/commit/dae808a7f8e6fb3e97133b2ba1bb63e5d2fe6cd3#diff-6624817c591460577e431b109e1f94c3210aa78575005107d3566587fe160812",
-    "https://github.com/gimpyiom1966/Manx-Model-weather/commit/dae808a7f8e6fb3e97133b2ba1bb63e5d2fe6cd3#diff-614fa5d9fc56ee21a48f285efbab9a3e7f2f53d46934c720ccfe42f165f5e47e"
+    "https://github.com/gimpyiom1966/Manx-Model-weather/blob/main/N-site-1.png",
+    "https://github.com/gimpyiom1966/Manx-Model-weather/blob/main/N-site-2.png"
   ],
-  NE: ["https://github.com/gimpyiom1966/Manx-Model-weather/commit/dae808a7f8e6fb3e97133b2ba1bb63e5d2fe6cd3#diff-706c7f7c0572e8f51cbb35048328e9a6f49efe02b19295a23b5decaff789b02b"],
-  E: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/E-site-1.png"],
+  NE: ["https://github.com/gimpyiom1966/Manx-Model-weather/blob/main/NE-site-1.png"],
+  E: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/E-site-1.png"],
   SE: [], S: [], SW: [],
-  W: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/W-site-1.png",
-     "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/W-site-2.png"],
+  W: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/photos/W-site-1.png",
+     "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/photos/W-site-2.png"],
   NW: [
-    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NW-site-1.png",
-    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/assets/photos/NW-site-2.png"
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/photos/NW-site-1.png",
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/photos/NW-site-2.png"
   ]
 };
 
