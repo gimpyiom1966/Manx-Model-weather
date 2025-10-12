@@ -434,15 +434,15 @@
       return dirs[idx];
     }
 
-    function applyCompassRotation(windDeg) {
-      if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-      const angle = ((windDeg % 360) + 360) % 360;
-      const corrected = (angle + 180) % 360; // visual offset for icon
-      const needle = document.getElementById('compassNeedle');
-      if (needle) needle.style.transform = `rotate(${corrected}deg)`;
-      const dial = document.querySelector('.compass-dial');
-      if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
-    }
+function applyCompassRotation(windDeg) {
+  if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
+  const angle = ((windDeg % 360) + 360) % 360;
+  const needle = document.getElementById('compassNeedle');
+  if (needle) needle.style.transform = `rotate(${angle}deg)`;
+  const dial = document.querySelector('.compass-dial');
+  if (dial) dial.style.setProperty('--wind-direction', `${angle}deg`);
+}
+
 
     function setActiveRadar(view) {
       const btnW = document.getElementById('btnWindy');
