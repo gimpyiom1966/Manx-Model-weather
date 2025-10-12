@@ -275,17 +275,17 @@ const streetViewEmbeds = {
 /* photos per direction (update URLs once you upload files) */
 const sitePhotos = {
   N: [
-    "https://github.com/gimpyiom1966/Manx-Model-weather/blob/main/N-site-1.png",
-    "https://github.com/gimpyiom1966/Manx-Model-weather/blob/main/N-site-2.png"
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/N-site-1.png",
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/N-site-2.png"
   ],
-  NE: ["https://github.com/gimpyiom1966/Manx-Model-weather/blob/main/NE-site-1.png"],
-  E: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/E-site-1.png"],
+  NE: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NE-site-1.png"],
+  E: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NE-site-2.png"],
   SE: [], S: [], SW: [],
-  W: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/photos/W-site-1.png",
-     "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/photos/W-site-2.png"],
+  W: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/W-site-1.png",
+     "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/W-site-2.png"],
   NW: [
-    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/photos/NW-site-1.png",
-    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/blob/main/photos/NW-site-2.png"
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NW-site-1.png",
+    "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NW-site-2.png"
   ]
 };
 
@@ -600,17 +600,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const bO = document.getElementById('btnOpenMeteo');
   if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
   if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
-
-// Wire Alt Site button
-const altBtn = document.getElementById('altSiteBtn');
-if (altBtn) altBtn.addEventListener('click', cycleStreetView);
-
-// Wire Pictures toggle (safe, id exists by DOMContentLoaded)
-const picsBtn = document.getElementById('picturesBtn');
-if (picsBtn) {
-  picsBtn.addEventListener('click', () => {
-    // toggle mode
-    streetViewMode = (streetViewMode === 'pictures') ? 'street' : 'pictures';
 
     // build icon for new state
     const icon = document.createElement('span');
