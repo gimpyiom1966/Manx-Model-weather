@@ -437,7 +437,7 @@
     function applyCompassRotation(windDeg) {
       if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
       const angle = ((windDeg % 360) + 360) % 360;
-      const corrected = (angle + 45 + 360) % 360; // visual offset for icon
+      const corrected = (angle + 360) % 360; // visual offset for icon
       const needle = document.getElementById('compassNeedle');
       if (needle) needle.style.transform = `rotate(${corrected}deg)`;
       const dial = document.querySelector('.compass-dial');
