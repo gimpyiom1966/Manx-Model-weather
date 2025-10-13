@@ -190,8 +190,9 @@
               </div>
               <hr class="border-gray-300 dark:border-gray-600" />
               <div>
-                <h3 class="font-bold text-primary text-xl">Extended Forecast</h3>
-                <p class="text-text-light dark:text-text-dark leading-relaxed">The week ahead promises predominantly sunny skies with moderate temperatures, hovering near a pleasant 15°C.</p>
+                <h3 class="font-bold text-primary text-xl">What Glider to Use</h3>
+                <p id="gliderAdvice" class="text-text-light dark:text-text-dark leading-relaxed font-semibold">Loading recommendation…</p>
+
               </div>
             </div>
           </section>
@@ -531,6 +532,11 @@ function applyCompassRotation(windDeg) {
         if (labelEl && labelEl.textContent !== `Wind From: ${windDirLabel}`) {
           labelEl.textContent = `Wind From: ${windDirLabel}`;
         }
+        
+        // capture numeric wind for glider advice and notify observer
+        const numericWind = (typeof windSpeed === 'number') ? windSpeed : (parseInt(document.getElementById('windSpeed')?.textContent) || null);
+        window.latestWindSpeed = numericWind;
+        if (typeof window.updateGliderAdvice === 'function') window.updateGliderAdvice(numericWind);
 
         const dEl = document.getElementById('windDirDegrees');
         if (dEl && windDirDeg !== null) dEl.textContent = `Direction: ${Math.round(windDirDeg)}°`;
@@ -540,7 +546,51 @@ function applyCompassRotation(windDeg) {
           const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
           uEl.textContent = `Last update: ${stamp.toLocaleString()}`;
         }
+// Glider recommendation based on wind mph
+function recommendGliderFromWind(windMph) {
+  if (windMph === null || windMph === undefined || isNaN(Number(windMph))) return "No wind data available";
+  const w = Number(windMph);
+  if (w < 5) return "Powered glider or floater";
+  if (w >= 5 && w < 10) return "Power glider or large wing span glider";
+  if (w >= 10 && w < 20) return "Normal to strong wind glider";
+  if (w >= 20 && w < 30) return "Extreme glider";
+  return "Stay in bed...!";
+}
 
+// Call this after you update windSpeed in fetchAndUpdateWeather
+// (insert this call where fetchAndUpdateWeather sets windSpeed in the DOM)
+(function attachGliderAdviceHook() {
+  // Safe helper to update advice
+  function updateAdvice(windMph) {
+    const el = document.getElementById('gliderAdvice');
+    if (!el) return;
+    el.textContent = recommendGliderFromWind(windMph);
+  }
+
+  // Try to patch into existing fetch flow:
+  // If fetchAndUpdateWeather sets windSpeed variable then updates DOM, call updateAdvice there.
+  // To ensure update even if you don't modify fetchAndUpdateWeather directly, observe changes to windSpeed element.
+  const windSpeedNode = document.getElementById('windSpeed');
+  if (windSpeedNode) {
+    // Update immediately from current content if present
+    const match = windSpeedNode.textContent.match(/(\d+)/);
+    if (match) updateAdvice(Number(match[1]));
+
+    // Observe later changes to windSpeed element and update advice automatically
+    const observer = new MutationObserver(() => {
+      const m = windSpeedNode.textContent.match(/(\d+)/);
+      updateAdvice(m ? Number(m[1]) : null);
+    });
+    observer.observe(windSpeedNode, { childList: true, subtree: true, characterData: true });
+  } else {
+    // Fallback: update using any global variable windSpeed numeric you set; try common names
+    if (typeof window.latestWindSpeed === 'number') updateAdvice(window.latestWindSpeed);
+    // expose updateAdvice for manual calls
+    window.updateGliderAdvice = updateAdvice;
+  }
+})();
+
+  
         // Forecast strip (next 12 future hours)
         const fStrip = document.getElementById('forecastStrip');
         if (hourly && hourly.time && fStrip) {
