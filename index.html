@@ -492,11 +492,34 @@ function applyCompassRotation(windDeg) {
           }
           return hourly[variable] && hourly[variable].length > nearestIdx ? hourly[variable][nearestIdx] : null;
         }
+        // Diagnostic: inspect remote payload and resolved humidity
+          console.log('weather payload', data);
+          const rawHumidity = (current && (current.relative_humidity_2m ?? current.humidity)) ?? null;
+          console.log('rawHumidity candidates -> current.relative_humidity_2m / current.humidity:', rawHumidity);
 
         const temp = current && typeof current.temperature_2m === 'number' ? current.temperature_2m : pickHourlyNearest('temperature_2m');
-        const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
+        //const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
         const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
         const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
+      // Resolve humidity safely from available sources
+          let resolvedHumidity = null;
+          // Weatherstack uses current.humidity (percent). Open-Meteo hourly may provide relative_humidity_2m.
+          if (current && typeof current.humidity === 'number') resolvedHumidity = current.humidity;
+          else if (current && typeof current.relative_humidity_2m === 'number') resolvedHumidity = current.relative_humidity_2m;
+          else if (hourly && hourly.relative_humidity_2m) {
+          // pickHourlyNearest is already defined in your function; prefer it if you used it earlier
+        resolvedHumidity = pickHourlyNearest ? pickHourlyNearest('relative_humidity_2m') : hourly.relative_humidity_2m[0];
+        }
+
+        // Validate and clamp
+          if (resolvedHumidity !== null && !isNaN(Number(resolvedHumidity))) {
+            resolvedHumidity = Math.max(0, Math.min(100, Math.round(Number(resolvedHumidity))));
+          if (el('humidity')) el('humidity').textContent = `${resolvedHumidity}%`;
+          } else {
+          // don't show 100% as a fallback; show -- to indicate missing data
+          if (el('humidity')) el('humidity').textContent = `--`;
+          }
+          console.log('resolvedHumidity final:', resolvedHumidity);
 
         const windDirLabel = degToCardinal(windDirDeg);
         const siteKey = (function normalizeCardinal(label) {
