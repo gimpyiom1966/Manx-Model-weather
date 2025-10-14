@@ -517,7 +517,27 @@ function applyCompassRotation(windDeg) {
           if (el('humidity')) el('humidity').textContent = `${resolvedHumidity}%`;
           } else {
           // don't show 100% as a fallback; show -- to indicate missing data
-          if (el('humidity')) el('humidity').textContent = `--`;
+          // Resolve humidity safely from available sources and update DOM
+          let resolvedHumidity = null;
+          // Weatherstack uses current.humidity (percent). Open-Meteo may use relative_humidity_2m.
+          if (current && typeof current.humidity === 'number') resolvedHumidity = current.humidity;
+          else if (current && typeof current.relative_humidity_2m === 'number') resolvedHumidity = current.relative_humidity_2m;
+            else if (hourly && typeof hourly.relative_humidity_2m !== 'undefined') {
+          // pickNearest helper may exist in this scope (if defined earlier). Use it if available.
+              if (typeof pickHourlyNearest === 'function') resolvedHumidity = pickHourlyNearest('relative_humidity_2m');
+                else resolvedHumidity = Array.isArray(hourly.relative_humidity_2m) ? hourly.relative_humidity_2m[0] : null;
+            }
+
+          // Validate, clamp and show
+          if (resolvedHumidity !== null && !isNaN(Number(resolvedHumidity))) {
+            resolvedHumidity = Math.max(0, Math.min(100, Math.round(Number(resolvedHumidity))));
+            const humEl = document.getElementById('humidity');
+            if (humEl) humEl.textContent = `${resolvedHumidity}%`;
+            } else {
+            const humEl = document.getElementById('humidity');
+              if (humEl) humEl.textContent = `--`;
+                }
+
           }
           console.log('resolvedHumidity final:', resolvedHumidity);
 
