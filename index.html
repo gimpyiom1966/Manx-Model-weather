@@ -516,7 +516,7 @@ function applyCompassRotation(windDeg) {
           console.log('rawHumidity candidates -> current.relative_humidity_2m / current.humidity:', rawHumidity);
 
         const temp = current && typeof current.temperature_2m === 'number' ? current.temperature_2m : pickHourlyNearest('temperature_2m');
-        //const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
+        const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
         const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
         const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
       // Resolve humidity safely from available sources
