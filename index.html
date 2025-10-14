@@ -46,6 +46,9 @@
     /* Icons and animations */
     @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin-slow { animation: spin-slow 2s linear infinite; }
+    @keyframes spin-fast { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .weather-spin { animation: spin-fast 1s linear infinite; transform-origin: 50% 50%; display: inline-block; }
+
 
     /* UI helpers */
     .compass-dial { transform: rotate(var(--wind-direction, 0deg)); transition: transform 600ms ease; }
@@ -129,7 +132,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <!-- Wind Speed -->
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
-                <span class="material-symbols-outlined text-primary text-4xl mb-3 weather-icon-spin">air</span>
+                <span class="material-symbols-outlined text-primary text-4xl mb-3 weather-spin">air</span>
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark">Wind Speed</p>
                 <p id="windSpeed" class="text-3xl font-bold text-gray-900 dark:text-white temp-change">-- <span class="text-xl font-normal">mph</span></p>
                 <p id="windGust" class="text-sm text-text-muted-light mt-1">Gusts: -- mph</p>
