@@ -453,15 +453,14 @@
 
 function applyCompassRotation(windDeg) {
   if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-  const angle = ((windDeg % 360) + 360) % 360;
-   const corrected = (raw + 180) % 360; // 180° correction
-  // rotate the needle image so its nose points to the wind bearing
+  const raw = ((windDeg % 360) + 360) % 360;
+  const corrected = (raw + 180) % 360; // 180° correction
   const needleImg = document.getElementById('compassNeedleImg');
-  if (needleImg) needleImg.style.transform = `rotate(${angle}deg)`;
-  // keep dial static (or optionally update dial CSS var if you want combined effects)
+  if (needleImg) needleImg.style.transform = `rotate(${corrected}deg)`;
   const dial = document.querySelector('.compass-dial');
   if (dial) dial.style.setProperty('--wind-direction', `0deg`);
 }
+
 
 
 
