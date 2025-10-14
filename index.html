@@ -79,7 +79,16 @@
             </div>
             <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden h-[360px] md:h-[50vh]">
               <!-- Windy embed disabled to avoid CORS; if you want to re-enable Windy, set weatherRadarIframe.src = weatherRadarIframe.dataset.src -->
-              <iframe id="weatherRadarIframe" class="embed-full" title="Weather radar" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src=""></iframe>
+              <iframe
+                id="weatherRadarIframe"
+                    class="embed-full"
+                    title="Weather radar"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    data-src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
+                    src=""
+          ></iframe>
+
             </div>
           </section>
 
@@ -309,19 +318,20 @@
         wrapper.appendChild(iframe);
       }
     })();
-
+        ///DOM Loader 
     document.addEventListener('DOMContentLoaded', () => {
-      const bW = el('btnWindy'), bO = el('btnOpenMeteo');
-      if (bW) bW.addEventListener('click', () => {
-        // If you really want to enable Windy, uncomment the next two lines:
-        // const radarFrame = el('weatherRadarIframe'); if (radarFrame) { radarFrame.src = radarFrame.dataset?.src || ''; }
-        bW.classList.toggle('toggle-active'); bW.classList.toggle('toggle-inactive');
-        bO.classList.toggle('toggle-active'); bO.classList.toggle('toggle-inactive');
-      });
-      if (bO) bO.addEventListener('click', () => {
-        bO.classList.add('toggle-active'); bO.classList.remove('toggle-inactive');
-        if (bW) { bW.classList.remove('toggle-active'); bW.classList.add('toggle-inactive'); }
-      });
+if (bW) bW.addEventListener('click', () => {
+  const radarFrame = el('weatherRadarIframe');
+  if (radarFrame && radarFrame.dataset && radarFrame.dataset.src) {
+    // load Windy embed when user explicitly requests it
+    radarFrame.src = radarFrame.dataset.src;
+  }
+  bW.classList.toggle('toggle-active');
+  bW.classList.toggle('toggle-inactive');
+  bO.classList.toggle('toggle-active');
+  bO.classList.toggle('toggle-inactive');
+});
+
 
       // Pictures button logic
       const picsBtn = el('picturesBtn');
