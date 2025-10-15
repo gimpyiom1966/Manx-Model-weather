@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
   <meta charset="utf-8" />
@@ -70,6 +70,16 @@
       display: block;
       pointer-events: none;
       } 
+    @keyframes spin-dynamic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.weather-spin {
+  animation-name: spin-dynamic;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-duration: var(--weather-spin-duration, 2s);
+  transform-origin: 50% 50%;
+  display: inline-block;
+}
+
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -528,6 +538,29 @@ function applyCompassRotation(windDeg) {
           // pickHourlyNearest is already defined in your function; prefer it if you used it earlier
         resolvedHumidity = pickHourlyNearest ? pickHourlyNearest('relative_humidity_2m') : hourly.relative_humidity_2m[0];
         }
+      // Map wind speed (mph) to animation duration (seconds).
+      // Higher wind -> faster spin (shorter duration). Adjust min/max as needed.
+        function spinDurationForWindSpeed(mph) {
+        if (mph === null || mph === undefined || isNaN(Number(mph))) return 2; // default
+        const v = Number(mph);
+        const MIN_DUR = 0.35; // fastest (high wind)
+        const MAX_DUR = 3.5;  // slowest (calm)
+        // Invert wind speed into a 0..1 range using a damping curve
+        const normalized = Math.min(1, v / 40); // 40 mph saturates to fastest
+        const t = MAX_DUR - normalized * (MAX_DUR - MIN_DUR);
+        return Math.max(MIN_DUR, Math.min(MAX_DUR, t));
+        }
+
+// Call this each time wind speed is updated
+function updateWeatherIconSpin(mph) {
+  const dur = spinDurationForWindSpeed(mph);
+  // Apply to root or a container; targeting :root makes it simple for multiple icons
+  document.documentElement.style.setProperty('--weather-spin-duration', `${dur}s`);
+  // Ensure icon(s) have class 'weather-spin'
+  document.querySelectorAll('.material-symbols-outlined.weather-spin, .weather-spin').forEach(el => {
+    if (!el.classList.contains('weather-spin')) el.classList.add('weather-spin');
+  });
+}
 
         // Validate and clamp
           if (resolvedHumidity !== null && !isNaN(Number(resolvedHumidity))) {
@@ -689,6 +722,8 @@ function recommendGliderFromWind(windMph) {
 
         applyCompassRotation(windDirDeg);
         updateMapAndStreetView(siteKey);
+        updateWeatherIconSpin(windSpeed);
+
 
       } catch (err) {
         console.error('Open-Meteo fetch error', err);
