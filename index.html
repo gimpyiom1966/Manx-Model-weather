@@ -633,8 +633,10 @@ function updateWeatherIconSpin(mph) {
         }
         
         // capture numeric wind for glider advice and notify observer
-        const numericWind = (typeof windSpeed === 'number') ? windSpeed : (parseInt(document.getElementById('windSpeed')?.textContent) || null);
-        window.latestWindSpeed = numericWind;
+          const numericWind = (typeof windSpeed === 'number') ? windSpeed : (parseInt(el('windSpeed')?.textContent) || null);
+          window.latestWindSpeed = numericWind;
+          updateWeatherIconSpin(numericWind);
+
         if (typeof window.updateGliderAdvice === 'function') window.updateGliderAdvice(numericWind);
 
         const dEl = document.getElementById('windDirDegrees');
