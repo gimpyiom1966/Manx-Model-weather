@@ -475,7 +475,22 @@ function applyCompassRotation(windDeg) {
   if (dial) dial.style.setProperty('--wind-direction', `0deg`);
 }
 
+        // Clean humidity block
+        (function updateHumidityDisplay() {
+          const raw = rawHumidity;
+          const humEl = document.getElementById('humidity');
+          if (!humEl) return;
 
+          let resolvedHumidity = null;
+          if (raw !== null && !isNaN(Number(raw))) {
+            resolvedHumidity = Math.max(0, Math.min(100, Math.round(Number(raw))));
+            humEl.textContent = `${resolvedHumidity}%`;
+            humEl.title = `Open-Meteo hourly humidity: ${raw}`;
+          } else {
+            humEl.textContent = `--`;
+            humEl.title = `Humidity data unavailable`;
+          }
+        })();
 
 
 
@@ -529,15 +544,7 @@ function applyCompassRotation(windDeg) {
         const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
         const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
         const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
-      // Resolve humidity safely from available sources
-          let resolvedHumidity = null;
-          // Weatherstack uses current.humidity (percent). Open-Meteo hourly may provide relative_humidity_2m.
-          if (current && typeof current.humidity === 'number') resolvedHumidity = current.humidity;
-          else if (current && typeof current.relative_humidity_2m === 'number') resolvedHumidity = current.relative_humidity_2m;
-          else if (hourly && hourly.relative_humidity_2m) {
-          // pickHourlyNearest is already defined in your function; prefer it if you used it earlier
-        resolvedHumidity = pickHourlyNearest ? pickHourlyNearest('relative_humidity_2m') : hourly.relative_humidity_2m[0];
-        }
+     
       // Map wind speed (mph) to animation duration (seconds).
       // Higher wind -> faster spin (shorter duration). Adjust min/max as needed.
         function spinDurationForWindSpeed(mph) {
@@ -562,36 +569,10 @@ function updateWeatherIconSpin(mph) {
   });
 }
 
-        // Validate and clamp
-          if (resolvedHumidity !== null && !isNaN(Number(resolvedHumidity))) {
-            resolvedHumidity = Math.max(0, Math.min(100, Math.round(Number(resolvedHumidity))));
-          if (el('humidity')) el('humidity').textContent = `${resolvedHumidity}%`;
-          } else {
-          // don't show 100% as a fallback; show -- to indicate missing data
-          // Resolve humidity safely from available sources and update DOM
-          let resolvedHumidity = null;
-          // Weatherstack uses current.humidity (percent). Open-Meteo may use relative_humidity_2m.
-          if (current && typeof current.humidity === 'number') resolvedHumidity = current.humidity;
-          else if (current && typeof current.relative_humidity_2m === 'number') resolvedHumidity = current.relative_humidity_2m;
-            else if (hourly && typeof hourly.relative_humidity_2m !== 'undefined') {
-          // pickNearest helper may exist in this scope (if defined earlier). Use it if available.
-              if (typeof pickHourlyNearest === 'function') resolvedHumidity = pickHourlyNearest('relative_humidity_2m');
-                else resolvedHumidity = Array.isArray(hourly.relative_humidity_2m) ? hourly.relative_humidity_2m[0] : null;
-            }
 
-          // Validate, clamp and show
-          if (resolvedHumidity !== null && !isNaN(Number(resolvedHumidity))) {
-            resolvedHumidity = Math.max(0, Math.min(100, Math.round(Number(resolvedHumidity))));
-            const humEl = document.getElementById('humidity');
-            if (humEl) humEl.textContent = `${resolvedHumidity}%`;
-            } else {
-            const humEl = document.getElementById('humidity');
-              if (humEl) humEl.textContent = `--`;
-                }
 
-          }
-          console.log('resolvedHumidity final:', resolvedHumidity);
-
+        
+      
         const windDirLabel = degToCardinal(windDirDeg);
         const siteKey = (function normalizeCardinal(label) {
           const map = { N:'N', NNE:'N', NNW:'N', NE:'NE', ENE:'NE', E:'E', ESE:'E', SE:'SE', SSE:'SE', S:'S', SSW:'S', SW:'SW', WSW:'SW', W:'W', WNW:'W', NW:'NW' };
