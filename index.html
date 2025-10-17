@@ -43,13 +43,6 @@
     .fade-hidden { opacity: 0 !important; pointer-events: none; }
     #streetFrameWrapper img.site-photo { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
 
-    /* Icons and animations */
-    @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .animate-spin-slow { animation: spin-slow 2s linear infinite; }
-    @keyframes spin-fast { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .weather-spin { animation: spin-fast 1s linear infinite; transform-origin: 50% 50%; display: inline-block; }
-
-
     /* UI helpers */
     .compass-dial { transform: rotate(var(--wind-direction, 0deg)); transition: transform 600ms ease; }
     .temp-change { animation: pulse 2s infinite alternate ease-in-out; }
@@ -848,14 +841,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Boot: fetch now and every 5 minutes
     document.addEventListener('DOMContentLoaded', () => {
-      setActiveRadar('windy');
+     
       const bW = document.getElementById('btnWindy');
       const bO = document.getElementById('btnOpenMeteo');
       if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
       if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
 
-      //fetchAndUpdateWeather();
-     // setInterval(fetchAndUpdateWeather, 300000);
     });
   </script>
 </body>
