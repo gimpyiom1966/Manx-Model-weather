@@ -1,9 +1,9 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pauls Model Glider flying Site Guide - Isle of Man Weather</title>
+  <title>Pauls Model Glider flying Site Guide!! - Isle of Man Weather</title>
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-  <!-- Tailwind -->
+  <!-- Tailwind (dev CDN; replace with compiled CSS for production) -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>
     tailwind.config = {
@@ -31,58 +31,54 @@
             "text-muted-dark": "#80CBC4",
           },
           fontFamily: { display: ["Space Grotesk"] },
-          borderRadius: { DEFAULT: "0.5rem", lg: "0.75rem", xl: "1.5rem", full: "9999px" },
         },
       },
     };
   </script>
 
   <style>
-    /* Fade and image fit */
+    /* layout helpers */
     #streetFrameWrapper { transition: opacity 300ms ease; opacity: 1; }
     .fade-hidden { opacity: 0 !important; pointer-events: none; }
     #streetFrameWrapper img.site-photo { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
 
-    /* UI helpers */
-    .compass-dial { transform: rotate(var(--wind-direction, 0deg)); transition: transform 600ms ease; }
-    .temp-change { animation: pulse 2s infinite alternate ease-in-out; }
-    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
-    .weather-icon-spin { animation: spin 5s linear infinite; }
-    #compassNeedle { display: inline-block; transform-origin: center; transition: transform 600ms ease; }
-    .embed-full { width: 100%; height: 100%; border: 0; display: block; }
-    .toggle-btn { padding: 6px 10px; border-radius: 8px; cursor: pointer; }
-    .toggle-active { background-color: rgba(0,160,160,1); color: white; }
-    .toggle-inactive { background-color: rgba(0,0,0,0.06); color: inherit; }
-    /* needle image styling */
+    /* compass needle */
     #compassNeedleImg {
-      width: 96px;               /* adjust size to taste */
+      width: 96px; /* requested */
       height: auto;
       transform-origin: 50% 50%;
       transform: rotate(0deg);
       transition: transform 600ms ease;
       display: block;
       pointer-events: none;
-      } 
-@keyframes spin-dynamic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.weather-spin {
-  animation-name: spin-dynamic;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-duration: var(--weather-spin-duration, 2s);
-  transform-origin: 50% 50%;
-  display: inline-block;
-  transition: animation-duration 0.5s ease;
-}
+    }
+    .compass-dial { transition: transform 600ms ease; transform: rotate(0deg); }
 
-}
+    /* dynamic weather icon spin (single definition) */
+    @keyframes spin-dynamic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .weather-spin {
+      animation-name: spin-dynamic;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-duration: var(--weather-spin-duration, 2s);
+      transform-origin: 50% 50%;
+      display: inline-block;
+      transition: animation-duration 0.5s ease;
+    }
 
+    .temp-change { animation: pulse 2s infinite alternate ease-in-out; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+    .embed-full { width: 100%; height: 100%; border: 0; display: block; }
+    .toggle-btn { padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+    .toggle-active { background-color: rgba(0,160,160,1); color: white; }
+    .toggle-inactive { background-color: rgba(0,0,0,0.06); color: inherit; }
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
   <div class="flex flex-col min-h-screen">
-    <!-- Header -->
     <header class="bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-300 dark:border-gray-700">
       <div class="container mx-auto px-2 sm:px-4 lg:px-6">
         <div class="flex items-center justify-between h-16">
@@ -94,33 +90,30 @@
       </div>
     </header>
 
-    <!-- Main -->
     <main class="flex-grow container mx-auto px-2 sm:px-4 lg:px-6 py-6">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <!-- Left column (2/5) -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Weather Radar -->
           <section id="radar-section" class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between mb-3">
               <h2 class="text-xl md:text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
               <div id="radarToggle" class="ml-3 flex gap-2">
-                <button id="btnWindy" class="toggle-btn toggle-active">Windy (default)</button>
-                <button id="btnOpenMeteo" class="toggle-btn toggle-inactive">Open‑Meteo</button>
+                <button id="btnWindy" class="toggle-btn toggle-inactive">Windy</button>
+                <button id="btnOpenMeteo" class="toggle-btn toggle-active">Open‑Meteo</button>
               </div>
             </div>
             <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden h-[360px] md:h-[50vh]">
               <iframe
                 id="weatherRadarIframe"
                 class="embed-full"
-                data-src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
                 title="Weather radar"
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"
+                data-src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
+                src=""
               ></iframe>
             </div>
           </section>
 
-          <!-- Flying Site Map -->
           <section id="map-section" class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
             <h2 class="text-xl md:text-2xl font-bold mb-3 text-primary text-center">Flying Site Map</h2>
             <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
@@ -129,37 +122,30 @@
           </section>
         </div>
 
-        <!-- Right column (3/5) -->
         <div class="lg:col-span-3 space-y-6">
-          <!-- Current Conditions -->
           <section id="conditions-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-2xl font-bold mb-4 text-primary text-center">Current Conditions: Isle of Man</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <!-- Wind Speed -->
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
-                <span class="material-symbols-outlined text-primary text-2xl weather-spin">air</span>
-
+                <span class="material-symbols-outlined text-primary text-4xl mb-3 weather-spin">air</span>
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark">Wind Speed</p>
                 <p id="windSpeed" class="text-3xl font-bold text-gray-900 dark:text-white temp-change">-- <span class="text-xl font-normal">mph</span></p>
                 <p id="windGust" class="text-sm text-text-muted-light mt-1">Gusts: -- mph</p>
                 <p id="windDirDegrees" class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Direction: --</p>
               </div>
 
-              <!-- Wind Direction -->
               <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
                 <div class="relative w-32 h-32">
                   <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
-                  <div class="absolute inset-0 compass-dial flex items-center justify-center" style="--wind-direction:0deg;">
+                  <div class="absolute inset-0 compass-dial flex items-center justify-center">
                     <img id="compassNeedleImg" src="assets/glider-needle.png" alt="glider needle" />
                   </div>
-
                 </div>
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-3">Wind Direction</p>
                 <p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-2 min-h-[2.5rem] flex items-center justify-center">--</p>
               </div>
 
-              <!-- Temperature / Humidity -->
               <div class="space-y-4 bg-background-light dark:bg-background-dark p-5 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 flex flex-col justify-center">
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-primary">device_thermostat</span>
@@ -180,18 +166,15 @@
             </div>
           </section>
 
-          <!-- Street View -->
           <section id="street-view" class="w-full bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
               <h2 id="streetLabel" class="text-2xl font-bold text-primary">Street View</h2>
               <div class="flex items-center gap-3">
                 <button id="picturesBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-4 py-2 rounded-lg text-base font-semibold flex items-center gap-2" title="Show photos for this wind direction">
-                  <span class="material-symbols-outlined">photo_library</span>
-                  Pictures
+                  <span class="material-symbols-outlined">photo_library</span> Pictures
                 </button>
                 <button id="altSiteBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-5 py-2 rounded-lg text-base font-semibold flex items-center gap-2" title="Cycle alternate views for this wind direction">
-                  <span class="material-symbols-outlined animate-spin-slow">refresh</span>
-                  Alt Site
+                  <span class="material-symbols-outlined animate-spin-slow">refresh</span> Alt Site
                 </button>
               </div>
             </div>
@@ -200,20 +183,20 @@
             </div>
           </section>
 
-          <!-- Forecast -->
           <section id="forecast-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
             <h2 class="text-2xl font-bold mb-4 text-primary text-center">Forecast</h2>
+
             <div id="forecastStrip" class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
+
             <div class="space-y-5 mt-6">
               <div>
                 <h3 class="font-bold text-primary text-xl">Next 24 Hours</h3>
-                <p id="textForecast" class="mt-2 text-text-light dark:text-text-dark"></p>
+                <p id="textForecast" class="text-text-light dark:text-text-dark leading-relaxed">Loading...</p>
               </div>
               <hr class="border-gray-300 dark:border-gray-600" />
               <div>
                 <h3 class="font-bold text-primary text-xl">What Glider to Use</h3>
                 <p id="gliderAdvice" class="text-text-light dark:text-text-dark leading-relaxed font-semibold">Loading recommendation…</p>
-
               </div>
             </div>
           </section>
@@ -221,7 +204,6 @@
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-background-light dark:bg-background-dark mt-8 border-t border-gray-300 dark:border-gray-700">
       <div class="container mx-auto px-2 sm:px-4 lg:px-6 py-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
         <p>© 2025 Pauls Model Glider. All rights reserved.</p>
@@ -229,15 +211,13 @@
     </footer>
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <!-- Map + Street View helpers (single consolidated) -->
   <script>
     // Helper
     function el(id) { return document.getElementById(id); }
 
-    // Init Leaflet (if container exists)
+    // Init Leaflet map
     if (typeof L !== 'undefined' && el('wind-map')) {
       try {
         window._windMapInstance = L.map('wind-map', { preferCanvas: true }).setView([54.236, -4.495], 10);
@@ -245,76 +225,61 @@
       } catch (e) { console.warn('Leaflet init failed:', e); }
     }
 
-    // Markers (arrays)
+    // Compass rotation (dial + needle), needle width set in CSS
+    function applyCompassRotation(windDeg) {
+      if (windDeg === null || windDeg === undefined) return;
+      const n = Number(windDeg);
+      if (isNaN(n)) return;
+      const raw = ((n % 360) + 360) % 360;
+      const dial = document.querySelector('.compass-dial');
+      if (dial) dial.style.transform = `rotate(${raw}deg)`;
+      const needleImg = document.getElementById('compassNeedleImg');
+      if (needleImg) {
+        const CORRECTION = 180; // adjust to 0/90/180 if needed for image native orientation
+        needleImg.style.transform = `rotate(${(raw + CORRECTION) % 360}deg)`;
+      }
+    }
+
+    // Basic markers, embeds, photos
     const markers = {
       N: [ { lat: 54.24, lng: -4.48, label: 'B10 - Peat' }, { lat: 54.297, lng: -4.40, label: "A18 Guthrie's" } ],
       NE: [ { lat: 54.23, lng: -4.46, label: 'Windy Corner' } ],
       E: [ { lat: 54.26, lng: -4.45, label: 'Verandah' } ],
-      SE: [ { lat: 54.12, lng: -4.73, label: 'Sloth Road' }, { lat: 54.24, lng: -4.51, label: 'Sheep Pens' }  ],
-      S: [ { lat: 54.128, lng: -4.71, label: 'SLoth Rd A36' } ],
+      SE: [ { lat: 54.12, lng: -4.73, label: 'Sloth Road' } ],
+      S: [ { lat: 54.24, lng: -4.51, label: 'Sheep Pens' } ],
       SW: [ { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' } ],
       W: [ { lat: 54.12, lng: -4.73, label: 'Stacks' }, { lat: 54.24, lng: -4.54, label: 'Slue maggle' } ],
       NW: [ { lat: 54.233703, lng: -4.658244, label: 'White Strand' }, { lat: 54.245554, lng: -4.498349, label: 'Stone Bridge' } ]
     };
 
-    // Google Street View embeds
     const streetViewEmbeds = {
-      N: [
-        "https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469",
-        "https://www.google.com/maps/embed?pb=!4v1760220624269!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJQ2VzNlgzOXdF!2m2!1d54.29606194833144!2d-4.404945039023309!3f334.5656291501481!4f7.428322536462105!5f0.7820865974627469"
-      ],
+      N: ["https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469"],
       NE: ["https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469"],
       E: ["https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.94!4f-2.03!5f0.7820865974627469"],
-      SE: ["https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469",
-      "https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469"
-        ],
+      SE: ["https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469"],
       S: ["https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469"],
-      SW: ["https://www.google.com/maps/embed?pb=!4v1760386890770!6m8!1m7!1sb4ieT11p9WQfrXYphpKvBQ!2m2!1d54.24650496082674!2d-4.563583472759578!3f227.64933997820498!4f0.8294798538663315!5f0.7820865974627469"],
-      W: [
-        "https://www.google.com/maps/embed?pb=!4v1759922941173!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f284.8373448827164!4f0.8266827177191516!5f0.7820865974627469",
-        "https://www.google.com/maps/embed?pb=!4v1760132659584!6m8!1m7!1sVSNjuCmXLL1dkzzsEwizHQ!2m2!1d54.24846832953868!2d-4.545133461494111!3f202.5766132355337!4f-10.737361959927355!5f0.7820865974627469"
-      ],
-      NW: [
-        "https://www.google.com/maps/embed?pb=!4v1760124117236!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJRE94S3VwN0FF!2m2!1d54.23370346113064!2d-4.658243884271213!3f272.0339775179602!4f-13.718213270304986!5f0.7820865974627469",
-        "https://www.google.com/maps/embed?pb=!4v1760125681149!6m8!1m7!1s-1_H9Wq-qTv0o8i04Ai8Qw!2m2!1d54.24555449571505!2d-4.498349202388866!3f324.36695324494!4f-12.896896978147822!5f0.7820865974627469"
-      ]
+      SW: ["https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.63!4f-1.10!5f0.400000000000000"],
+      W: ["https://www.google.com/maps/embed?pb=!4v1759922941173!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f284.8373448827164!4f0.8266827177191516!5f0.7820865974627469"],
+      NW: ["https://www.google.com/maps/embed?pb=!4v1760124117236!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJRE94S3VwN0FF!2m2!1d54.23370346113064!2d-4.658243884271213!3f272.0339775179602!4f-13.718213270304986!5f0.7820865974627469"]
     };
 
-    // Site photos (ensure these files exist at these paths)
     const sitePhotos = {
-      N: [
-        "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/N-site-1.png",
-        "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/N-site-2.png"
-      ],
+      N: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/N-site-1.png"],
       NE: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NE-site-1.png"],
       E: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/E-site-1.png"],
-      SE: [
-        "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/SE-site-1.png",
-        "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/SE-site-2.png"
-      ],
-      S: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/S-site-1.png"],
-      SW: [],
-      W: [
-        "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/W-site-1.png",
-        "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/W-site-2.png"
-      ],
-      NW: [
-        "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NW-site-1.png",
-        "https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NW-site-2.png"
-      ]
+      SE: [], S: [], SW: [],
+      W: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/W-site-1.png"],
+      NW: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NW-site-1.png"]
     };
 
-    // Index tracker and mode
     const embedIndexTracker = { N:0, NE:0, E:0, SE:0, S:0, SW:0, W:0, NW:0 };
-    let streetViewMode = 'street'; // 'street' or 'pictures'
+    let streetViewMode = 'street';
 
-    // Normalize cardinal to bucket
     function normalizeCardinal(label) {
       const map = { N:'N', NNE:'N', NNW:'N', NE:'NE', ENE:'NE', E:'E', ESE:'E', SE:'SE', SSE:'SE', S:'S', SSW:'S', SW:'SW', WSW:'SW', W:'W', WNW:'W', NW:'NW' };
       return map[label] || label;
     }
 
-    // Swap content with fade
     function setStreetViewContent({ type = 'iframe', src = '', index = 0, total = 1 } = {}) {
       const wrapper = el('streetFrameWrapper');
       if (!wrapper) return;
@@ -341,7 +306,6 @@
       }, 220);
     }
 
-    // Update view and map
     function updateMapAndStreetView(cardinal) {
       if (!cardinal) return;
       const key = normalizeCardinal(cardinal);
@@ -350,15 +314,11 @@
       const index = embedIndexTracker[key] || 0;
 
       if (streetViewMode === 'pictures' && photos.length) {
-        const photoSrc = photos[index % photos.length];
-        setStreetViewContent({ type: 'img', src: photoSrc, index, total: photos.length });
-        const streetLabel = el('streetLabel');
-        if (streetLabel) streetLabel.textContent = `Pictures: ${markers[key]?.[index]?.label || key} (${(index % photos.length) + 1}/${photos.length})`;
+        setStreetViewContent({ type: 'img', src: photos[index % photos.length], index, total: photos.length });
+        if (el('streetLabel')) el('streetLabel').textContent = `Pictures: ${markers[key]?.[index]?.label || key} (${(index % photos.length) + 1}/${photos.length})`;
       } else {
-        const embedSrc = embeds.length ? embeds[index % embeds.length] : '';
-        setStreetViewContent({ type: 'iframe', src: embedSrc, index, total: embeds.length || 1 });
-        const streetLabel = el('streetLabel');
-        if (streetLabel) streetLabel.textContent = `Street View: ${markers[key]?.[index]?.label || key} (${(index % (embeds.length || 1)) + 1}/${embeds.length || 1})`;
+        setStreetViewContent({ type: 'iframe', src: embeds.length ? embeds[index % embeds.length] : '', index, total: embeds.length || 1 });
+        if (el('streetLabel')) el('streetLabel').textContent = `Street View: ${markers[key]?.[index]?.label || key} (${(index % (embeds.length || 1)) + 1}/${embeds.length || 1})`;
       }
 
       const m = markers[key]?.[index];
@@ -371,7 +331,6 @@
       }
     }
 
-    // Initial wrapper guard
     (function ensureInitialStreetView() {
       const wrapper = el('streetFrameWrapper');
       if (!wrapper) return;
@@ -387,16 +346,42 @@
       }
     })();
 
-    // DOMContentLoaded wiring
     document.addEventListener('DOMContentLoaded', () => {
-      if (typeof setActiveRadar === 'function') setActiveRadar('windy');
-
-      // Radar toggle buttons
       const bW = el('btnWindy'), bO = el('btnOpenMeteo');
-      if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
-      if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
+      if (bW) bW.addEventListener('click', () => {
+        const radarFrame = el('weatherRadarIframe');
+        if (radarFrame && radarFrame.dataset && radarFrame.dataset.src) {
+          radarFrame.src = radarFrame.dataset.src;
+          radarFrame.setAttribute('data-src-loaded', 'true');
+        }
+        bW.classList.add('toggle-active'); bW.classList.remove('toggle-inactive');
+        bO.classList.remove('toggle-active'); bO.classList.add('toggle-inactive');
+      });
+      if (bO) bO.addEventListener('click', () => {
+        bO.classList.add('toggle-active'); bO.classList.remove('toggle-inactive');
+        if (bW) { bW.classList.remove('toggle-active'); bW.classList.add('toggle-inactive'); }
+      });
 
-      // Alt Site button
+      const picsBtn = el('picturesBtn');
+      if (picsBtn) {
+        function renderPicsBtn() {
+          const icon = document.createElement('span');
+          icon.className = 'material-symbols-outlined';
+          icon.textContent = (streetViewMode === 'pictures') ? 'tour' : 'photo_library';
+          while (picsBtn.firstChild) picsBtn.removeChild(picsBtn.firstChild);
+          picsBtn.appendChild(icon);
+          picsBtn.appendChild(document.createTextNode(streetViewMode === 'pictures' ? ' Street View' : ' Pictures'));
+        }
+        renderPicsBtn();
+        picsBtn.addEventListener('click', () => {
+          streetViewMode = (streetViewMode === 'pictures') ? 'street' : 'pictures';
+          renderPicsBtn();
+          const lbl = el('windDirLabel')?.textContent || '';
+          const currentDir = normalizeCardinal(lbl.split(': ')[1]) || 'NW';
+          updateMapAndStreetView(currentDir);
+        });
+      }
+
       const altBtn = el('altSiteBtn');
       if (altBtn) altBtn.addEventListener('click', () => {
         const lbl = el('windDirLabel')?.textContent || '';
@@ -410,49 +395,14 @@
         updateMapAndStreetView(currentDir);
       });
 
-      // Pictures toggle button
-      const picsBtn = el('picturesBtn');
-      if (picsBtn) {
-        function renderPicsBtn() {
-          const icon = document.createElement('span');
-          icon.className = 'material-symbols-outlined';
-          icon.textContent = (streetViewMode === 'pictures') ? 'tour' : 'photo_library';
-          while (picsBtn.firstChild) picsBtn.removeChild(picsBtn.firstChild);
-          picsBtn.appendChild(icon);
-          picsBtn.appendChild(document.createTextNode(streetViewMode === 'pictures' ? ' Street View' : ' Pictures'));
-        }
-        renderPicsBtn();
-
-        picsBtn.addEventListener('click', () => {
-          streetViewMode = (streetViewMode === 'pictures') ? 'street' : 'pictures';
-          renderPicsBtn();
-          const lbl = el('windDirLabel')?.textContent || '';
-          const currentDir = normalizeCardinal(lbl.split(': ')[1]) || 'NW';
-          updateMapAndStreetView(currentDir);
-        });
-      }
-
-      // Trigger initial view (use current wind label or fallback)
-      const initialDir = normalizeCardinal(el('windDirLabel')?.textContent?.split(': ')[1]) || 'NW';
-      updateMapAndStreetView(initialDir);
+      // initial street view fallback
+      updateMapAndStreetView('NW');
     });
   </script>
 
-  <!-- Weather fetch + UI updates + Radar toggle -->
+  <!-- Weather: Open-Meteo unified fetch + render -->
   <script>
-    const LAT = 54.236;
-    const LON = -4.548;
-    const WIND_SPEED_UNIT = 'mph';
-    const TIMEZONE = 'auto';
-    const VARIABLES = [
-      'temperature_2m',
-      'relative_humidity_2m',
-      'wind_speed_10m',
-      'wind_direction_10m',
-      'wind_gusts_10m'
-    ];
-
-    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(LAT)}&longitude=${encodeURIComponent(LON)}&hourly=${VARIABLES.join(',')}&current=${VARIABLES.join(',')}&windspeed_unit=${encodeURIComponent(WIND_SPEED_UNIT)}&timezone=${encodeURIComponent(TIMEZONE)}`;
+    const LAT = 54.236, LON = -4.548;
 
     function degToCardinal(deg) {
       if (typeof deg !== 'number' || isNaN(deg)) return '--';
@@ -461,392 +411,155 @@
       return dirs[idx];
     }
 
-function applyCompassRotation(windDeg) {
-  if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
-  const angle = ((windDeg % 360) + 360) % 360;
-  // rotate the needle image so its nose points to the wind bearing
-  const needleImg = document.getElementById('compassNeedleImg');
-  if (needleImg) needleImg.style.transform = `rotate(${angle}deg)`;
-  // keep dial static (or optionally update dial CSS var if you want combined effects)
-  const dial = document.querySelector('.compass-dial');
-  if (dial) dial.style.setProperty('--wind-direction', `0deg`);
-}
+    // Map wind speed to spin duration
+    function spinDurationForWindSpeed(mph) {
+      if (mph === null || mph === undefined || isNaN(Number(mph))) return 2;
+      const v = Math.max(0, Math.min(40, Number(mph)));
+      const MIN_DUR = 0.35, MAX_DUR = 3.5;
+      const t = MAX_DUR - (v / 40) * (MAX_DUR - MIN_DUR);
+      return Math.max(MIN_DUR, Math.min(MAX_DUR, t));
+    }
+    function updateWeatherIconSpin(mph) {
+      const dur = spinDurationForWindSpeed(mph);
+      document.documentElement.style.setProperty('--weather-spin-duration', `${dur}s`);
+      document.querySelectorAll('.material-symbols-outlined.weather-spin, .weather-spin').forEach(el => {
+        if (!el.classList.contains('weather-spin')) el.classList.add('weather-spin');
+      });
+    }
+
+    async function fetchAndRenderWeather() {
+      try {
+        const vars = ['temperature_2m','relative_humidity_2m','wind_speed_10m','wind_direction_10m','wind_gusts_10m','precipitation','weathercode'];
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=${vars.join(',')}&timezone=auto&forecast_days=2`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Open-Meteo request failed: ' + res.status);
+        const data = await res.json();
+        const hourly = data.hourly || null;
+
+        function pickHourlyNearest(variable) {
+          if (!hourly || !hourly.time) return null;
+          const times = hourly.time; const now = Date.now();
+          let nearestIdx = 0, nearestDiff = Infinity;
+          for (let i = 0; i < times.length; i++) {
+            const t = Date.parse(times[i]); const diff = Math.abs(t - now);
+            if (diff < nearestDiff) { nearestDiff = diff; nearestIdx = i; }
+          }
+          return hourly[variable] && hourly[variable].length > nearestIdx ? hourly[variable][nearestIdx] : null;
+        }
+
+        const temp = pickHourlyNearest('temperature_2m');
+        const windSpeed = pickHourlyNearest('wind_speed_10m');
+        const windDirDeg = pickHourlyNearest('wind_direction_10m');
+        const rawHumidity = pickHourlyNearest('relative_humidity_2m');
+        const windGust = pickHourlyNearest('wind_gusts_10m') ?? null;
+
+        // Temperature
+        if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
 
         // Clean humidity block
         (function updateHumidityDisplay() {
           const raw = rawHumidity;
-          const humEl = document.getElementById('humidity');
-          if (!humEl) return;
-
-          let resolvedHumidity = null;
+          const humEl = el('humidity'); if (!humEl) return;
           if (raw !== null && !isNaN(Number(raw))) {
-            resolvedHumidity = Math.max(0, Math.min(100, Math.round(Number(raw))));
-            humEl.textContent = `${resolvedHumidity}%`;
-            humEl.title = `Open-Meteo hourly humidity: ${raw}`;
+            const resolved = Math.max(0, Math.min(100, Math.round(Number(raw))));
+            humEl.textContent = `${resolved}%`;
+            humEl.title = `Open‑Meteo hourly humidity: ${raw}`;
           } else {
             humEl.textContent = `--`;
             humEl.title = `Humidity data unavailable`;
           }
         })();
 
-
-
-    function setActiveRadar(view) {
-      const btnW = document.getElementById('btnWindy');
-      const btnO = document.getElementById('btnOpenMeteo');
-      const radarFrame = document.getElementById('weatherRadarIframe');
-      const windyUrl = radarFrame?.getAttribute('data-src');
-
-      if (view === 'windy') {
-        if (radarFrame && (!radarFrame.src || radarFrame.getAttribute('data-src-loaded') !== 'true')) {
-          radarFrame.src = windyUrl;
-          radarFrame.setAttribute('data-src-loaded', 'true');
+        // Wind speed / gusts / direction
+        if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
+        if (el('windGust')) {
+          if (windGust !== null) { el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`; el('windGust').classList.remove('opacity-50'); }
+          else { el('windGust').textContent = `Gusts: N/A`; el('windGust').classList.add('opacity-50'); }
         }
-        if (btnW) { btnW.classList.add('toggle-active'); btnW.classList.remove('toggle-inactive'); }
-        if (btnO) { btnO.classList.remove('toggle-active'); btnO.classList.add('toggle-inactive'); }
-      } else {
-        if (btnO) { btnO.classList.add('toggle-active'); btnO.classList.remove('toggle-inactive'); }
-        if (btnW) { btnW.classList.remove('toggle-active'); btnW.classList.add('toggle-inactive'); }
-      }
-    }
-
-// --- Unified fetch + render (replace other weather fetch blocks) ---
-async function fetchAndRenderWeather() {
-  const vars = ['temperature_2m','relative_humidity_2m','wind_speed_10m','wind_direction_10m','wind_gusts_10m','precipitation','weathercode'];
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=${vars.join(',')}&timezone=auto&forecast_days=2`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Open-Meteo request failed: ' + res.status);
-    const data = await res.json();
-    const hourly = data.hourly || null;
-    function pickHourlyNearest(variable) {
-      if (!hourly || !hourly.time) return null;
-      const times = hourly.time; const now = Date.now();
-      let nearestIdx = 0, nearestDiff = Infinity;
-      for (let i=0;i<times.length;i++){
-        const t = Date.parse(times[i]); const diff = Math.abs(t - now);
-        if (diff < nearestDiff) { nearestDiff = diff; nearestIdx = i; }
-      }
-      return hourly[variable] && hourly[variable].length > nearestIdx ? hourly[variable][nearestIdx] : null;
-    }
-
-    const temp = pickHourlyNearest('temperature_2m');
-    const windSpeed = pickHourlyNearest('wind_speed_10m');
-    const windDirDeg = pickHourlyNearest('wind_direction_10m');
-    const rawHumidity = pickHourlyNearest('relative_humidity_2m');
-    const windGust = pickHourlyNearest('wind_gusts_10m') ?? null;
-
-    // Temperature
-    if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
-
-    // Humidity (cleaned single block)
-    (function updateHumidityDisplay() {
-      const raw = rawHumidity;
-      const humEl = el('humidity'); if (!humEl) return;
-      if (raw !== null && !isNaN(Number(raw))) {
-        const resolved = Math.max(0, Math.min(100, Math.round(Number(raw))));
-        humEl.textContent = `${resolved}%`;
-        humEl.title = `Open‑Meteo hourly humidity: ${raw}`;
-      } else {
-        humEl.textContent = `--`;
-        humEl.title = `Humidity data unavailable`;
-      }
-    })();
-
-    // Wind speed / gusts / direction
-    if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
-    if (el('windGust')) {
-      if (windGust !== null) { el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`; el('windGust').classList.remove('opacity-50'); }
-      else { el('windGust').textContent = `Gusts: N/A`; el('windGust').classList.add('opacity-50'); }
-    }
-    if (el('windDirDegrees') && windDirDeg !== null) el('windDirDegrees').textContent = `Direction: ${Math.round(windDirDeg)}°`;
-    const windDirLabel = degToCardinal(windDirDeg);
-    if (el('windDirLabel')) el('windDirLabel').textContent = `Wind From: ${windDirLabel}`;
-
-    // Forecast strip (next 12 hours)
-    const fStrip = el('forecastStrip');
-    if (fStrip && hourly && hourly.time) {
-      const now = Date.now(); const hrs = [];
-      for (let i=0;i<hourly.time.length && hrs.length<12;i++){
-        const t = Date.parse(hourly.time[i]);
-        if (t > now) hrs.push({ time: new Date(t), speed: hourly.wind_speed_10m[i], dirDeg: hourly.wind_direction_10m[i] });
-      }
-      fStrip.innerHTML = hrs.map(h => {
-        const hour = h.time.getHours().toString().padStart(2,'0');
-        const lbl = degToCardinal(h.dirDeg);
-        return `<div class="bg-background-light dark:bg-background-dark p-3 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 text-center">
-          <p class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">${hour}:00</p>
-          <span class="material-symbols-outlined text-primary text-2xl weather-spin">air</span>
-          <p class="font-bold text-gray-900 dark:text-white">${Math.round(h.speed||0)} mph</p>
-          <p class="text-sm text-text-muted-light dark:text-text-muted-dark">${lbl}</p>
-        </div>`;
-      }).join('');
-    }
-
-    // Apply compass and map
-    applyCompassRotation(windDirDeg);
-    updateMapAndStreetView(normalizeCardinal(windDirLabel));
-
-    // Dynamic spin + glider advice
-    const numericWind = (typeof windSpeed === 'number') ? windSpeed : (parseInt(el('windSpeed')?.textContent || '') || null);
-    updateWeatherIconSpin(numericWind);
-    if (typeof window.updateGliderAdvice === 'function') window.updateGliderAdvice(numericWind);
-
-    // Updated timestamp
-    if (el('updated')) {
-      const stamp = (hourly && hourly.time && hourly.time[0]) ? new Date(hourly.time[0]) : new Date();
-      el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
-    }
-  } catch (err) {
-    console.error('Open‑Meteo fetch error', err);
-    if (el('updated')) el('updated').textContent = 'Unable to load weather';
-  }
-}
-// call it (on boot or interval)
-fetchAndRenderWeather();
-setInterval(fetchAndRenderWeather, 300000);
-// --- end unified fetch ---
-
-
-
-        
-      
+        if (el('windDirDegrees') && windDirDeg !== null) el('windDirDegrees').textContent = `Direction: ${Math.round(windDirDeg)}°`;
         const windDirLabel = degToCardinal(windDirDeg);
-        const siteKey = (function normalizeCardinal(label) {
-          const map = { N:'N', NNE:'N', NNW:'N', NE:'NE', ENE:'NE', E:'E', ESE:'E', SE:'SE', SSE:'SE', S:'S', SSW:'S', SW:'SW', WSW:'SW', W:'W', WNW:'W', NW:'NW' };
-          return map[label] || label;
-        })(windDirLabel);
+        if (el('windDirLabel')) el('windDirLabel').textContent = `Wind From: ${windDirLabel}`;
 
-        let windGust = null;
-        if (current?.wind_gusts_10m !== undefined && typeof current.wind_gusts_10m === 'number') {
-          windGust = current.wind_gusts_10m;
-        } else {
-          windGust = pickHourlyNearest('wind_gusts_10m') ?? data?.daily?.maximum_wind_gusts_10m?.[0] ?? null;
-        }
-
-        const gEl = document.getElementById('windGust');
-        if (gEl) {
-          if (windGust !== null) {
-            gEl.textContent = `Gusts: ${Math.round(windGust)} mph`;
-            gEl.classList.remove('opacity-50');
-            gEl.setAttribute('title', '');
-          } else {
-            gEl.textContent = `Gusts: N/A`;
-            gEl.classList.add('opacity-50');
-            gEl.setAttribute('title', 'Wind gust data not available from Open-Meteo');
-          }
-        }
-
-        const tEl = document.getElementById('temp');
-        if (tEl && temp !== null) tEl.textContent = `${Math.round(temp)}°C`;
-
-        const hEl = document.getElementById('humidity');
-        if (hEl && humidity !== null) hEl.textContent = `${Math.round(humidity)}%`;
-
-        const sEl = document.getElementById('windSpeed');
-        if (sEl && windSpeed !== null) sEl.innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
-
-        const labelEl = document.getElementById('windDirLabel');
-        if (labelEl && labelEl.textContent !== `Wind From: ${windDirLabel}`) {
-          labelEl.textContent = `Wind From: ${windDirLabel}`;
-        }
-        
-        // capture numeric wind for glider advice and notify observer
-          const numericWind = (typeof windSpeed === 'number') ? windSpeed : (parseInt(el('windSpeed')?.textContent) || null);
-          window.latestWindSpeed = numericWind;
-          updateWeatherIconSpin(numericWind);
-
-        if (typeof window.updateGliderAdvice === 'function') window.updateGliderAdvice(numericWind);
-
-        const dEl = document.getElementById('windDirDegrees');
-        if (dEl && windDirDeg !== null) dEl.textContent = `Direction: ${Math.round(windDirDeg)}°`;
-
-        const uEl = document.getElementById('updated');
-        if (uEl) {
-          const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
-          uEl.textContent = `Last update: ${stamp.toLocaleString()}`;
-        }
-// Glider recommendation based on wind mph
-function recommendGliderFromWind(windMph) {
-  if (windMph === null || windMph === undefined || isNaN(Number(windMph))) return "No wind data available";
-  const w = Number(windMph);
-  if (w < 5) return "Powered glider or floater";
-  if (w >= 5 && w < 10) return "Power glider or large wing span glider";
-  if (w >= 10 && w < 20) return "Normal to strong wind glider";
-  if (w >= 20 && w < 30) return "Extreme glider";
-  return "Stay in bed...!";
-}
-
-// Call this after you update windSpeed in fetchAndUpdateWeather
-// (insert this call where fetchAndUpdateWeather sets windSpeed in the DOM)
-(function attachGliderAdviceHook() {
-  // Safe helper to update advice
-  function updateAdvice(windMph) {
-    const el = document.getElementById('gliderAdvice');
-    if (!el) return;
-    el.textContent = recommendGliderFromWind(windMph);
-  }
-
-  // Try to patch into existing fetch flow:
-  // If fetchAndUpdateWeather sets windSpeed variable then updates DOM, call updateAdvice there.
-  // To ensure update even if you don't modify fetchAndUpdateWeather directly, observe changes to windSpeed element.
-  const windSpeedNode = document.getElementById('windSpeed');
-  if (windSpeedNode) {
-    // Update immediately from current content if present
-    const match = windSpeedNode.textContent.match(/(\d+)/);
-    if (match) updateAdvice(Number(match[1]));
-
-    // Observe later changes to windSpeed element and update advice automatically
-    const observer = new MutationObserver(() => {
-      const m = windSpeedNode.textContent.match(/(\d+)/);
-      updateAdvice(m ? Number(m[1]) : null);
-    });
-    observer.observe(windSpeedNode, { childList: true, subtree: true, characterData: true });
-  } else {
-    // Fallback: update using any global variable windSpeed numeric you set; try common names
-    if (typeof window.latestWindSpeed === 'number') updateAdvice(window.latestWindSpeed);
-    // expose updateAdvice for manual calls
-    window.updateGliderAdvice = updateAdvice;
-  }
-})();
-
-  
-        // Forecast strip (next 12 future hours)
-        const fStrip = document.getElementById('forecastStrip');
-        if (hourly && hourly.time && fStrip) {
-          const now = Date.now();
-          const forecastHours = [];
-          for (let i = 0; i < hourly.time.length; i++) {
+        // Forecast strip cards (next 12 hours)
+        const fStrip = el('forecastStrip');
+        if (fStrip && hourly && hourly.time) {
+          const now = Date.now(); const hrs = [];
+          for (let i = 0; i < hourly.time.length && hrs.length < 12; i++) {
             const t = Date.parse(hourly.time[i]);
-            if (t > now && forecastHours.length < 12) {
-              forecastHours.push({
-                time: new Date(t),
-                speed: hourly.wind_speed_10m[i],
-                dirDeg: hourly.wind_direction_10m[i]
-              });
-            }
+            if (t > now) hrs.push({ time: new Date(t), speed: hourly.wind_speed_10m[i], dirDeg: hourly.wind_direction_10m[i] });
           }
-
-          fStrip.innerHTML = forecastHours.map(f => {
-            const label = degToCardinal(f.dirDeg);
-            const hour = f.time.getHours().toString().padStart(2,'0');
+          fStrip.innerHTML = hrs.map(h => {
+            const hour = h.time.getHours().toString().padStart(2,'0');
+            const label = degToCardinal(h.dirDeg);
             return `
               <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 text-center">
                 <p class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">${hour}:00</p>
-                <span class="material-symbols-outlined text-primary text-2xl">air</span>
-                <p class="font-bold text-gray-900 dark:text-white">${Math.round(f.speed)} mph</p>
+                <span class="material-symbols-outlined text-primary text-2xl weather-spin">air</span>
+                <p class="font-bold text-gray-900 dark:text-white">${Math.round(h.speed||0)} mph</p>
                 <p class="text-sm text-text-muted-light dark:text-text-muted-dark">${label}</p>
               </div>
             `;
           }).join('');
         }
 
+        // Apply compass and map
         applyCompassRotation(windDirDeg);
+        const siteKey = normalizeCardinal(degToCardinal(windDirDeg));
         updateMapAndStreetView(siteKey);
-        updateWeatherIconSpin(windSpeed);
 
+        // Glider advice and dynamic spin update
+        const numericWind = (typeof windSpeed === 'number') ? windSpeed : (parseInt(el('windSpeed')?.textContent || '') || null);
+        window.latestWindSpeed = numericWind;
+        updateWeatherIconSpin(numericWind);
+        if (typeof window.updateGliderAdvice === 'function') window.updateGliderAdvice(numericWind);
 
+        // Updated timestamp
+        if (el('updated')) {
+          const stamp = (hourly && hourly.time && hourly.time[0]) ? new Date(hourly.time[0]) : new Date();
+          el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
+        }
       } catch (err) {
         console.error('Open-Meteo fetch error', err);
-        const uEl = document.getElementById('updated');
-        if (uEl) uEl.textContent = 'Unable to load weather';
+        if (el('updated')) el('updated').textContent = 'Unable to load weather';
       }
     }
-    
-// Text forecast generator using Open-Meteo hourly data (next 24 hours)
-async function generateTextForecast() {
-  try {
-    const lat = 54.236;
-    const lon = -4.548;
-    const vars = ['temperature_2m','precipitation','weathercode','wind_speed_10m'];
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${vars.join(',')}&timezone=auto&forecast_days=2`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Open-Meteo fetch failed ' + res.status);
-    const data = await res.json();
-    const hourly = data.hourly;
-    if (!hourly || !hourly.time) throw new Error('No hourly data');
 
-    const now = Date.now();
-    const next24 = [];
-    for (let i = 0; i < hourly.time.length && next24.length < 24; i++) {
-      const t = Date.parse(hourly.time[i]);
-      if (t > now) next24.push({
-        time: new Date(t),
-        temp: hourly.temperature_2m?.[i] ?? null,
-        precip: hourly.precipitation?.[i] ?? 0,
-        code: hourly.weathercode?.[i] ?? null,
-        wind: hourly.wind_speed_10m?.[i] ?? null
-      });
-    }
-    if (!next24.length) throw new Error('No future hours');
-
-    // Simple heuristics
-    const totalPrecip = next24.reduce((s,h)=>s + (h.precip||0),0);
-    const maxTemp = Math.max(...next24.map(h=>h.temp||-999));
-    const minTemp = Math.min(...next24.map(h=>h.temp||999));
-    const avgWind = Math.round(next24.reduce((s,h)=>s + (h.wind||0),0) / next24.length);
-    const morning = next24.slice(0,8), evening = next24.slice(12,20);
-
-    // Precip wording
-    let precipPhrase = 'no significant precipitation expected';
-    if (totalPrecip >= 5) precipPhrase = 'rain likely through the period';
-    else if (totalPrecip > 0.5) precipPhrase = 'a chance of light showers';
-
-    // Temperature trend wording
-    let tempPhrase = `temperatures around ${Math.round((maxTemp+minTemp)/2)}°C`;
-    if (maxTemp - minTemp >= 4) {
-      if (morning[0]?.temp != null && evening[0]?.temp != null && evening[0].temp < morning[0].temp) tempPhrase = `temperatures easing from about ${Math.round(morning[0].temp)}°C down to around ${Math.round(evening[0].temp)}°C`;
-      else tempPhrase = `temperatures ranging ${Math.round(minTemp)}–${Math.round(maxTemp)}°C`;
-    }
-
-    // Wind wording
-    let windPhrase = `winds around ${avgWind} mph`;
-    const windMorningAvg = Math.round(morning.reduce((s,h)=>s+(h.wind||0),0)/Math.max(1,morning.length));
-    const windEveningAvg = Math.round(evening.reduce((s,h)=>s+(h.wind||0),0)/Math.max(1,evening.length));
-    if (windEveningAvg < windMorningAvg - 3) windPhrase = `winds easing to around ${windEveningAvg} mph by evening`;
-    else if (windEveningAvg > windMorningAvg + 3) windPhrase = `winds picking up to around ${windEveningAvg} mph later`;
-
-    // Weathercode quick mapping for adjectives (0 clear, 1-3 cloud, 61-67 rain etc.)
-    const wc = next24.map(h=>h.code).filter(c=>c!=null);
-    const anyRain = wc.some(c => (c >= 51 && c <= 67) || (c >= 80 && c <= 82));
-    const anySnow = wc.some(c => (c >= 71 && c <= 77) || (c >= 85 && c <= 86));
-    const cloudiness = wc.some(c=>c>=1 && c<=3) ? 'intermittent cloud cover' : 'clear skies';
-
-    let startPhrase = cloudiness;
-    if (anySnow) startPhrase = 'a risk of wintry showers';
-    else if (anyRain) startPhrase = 'showers or rain at times';
-
-    // Compose single sentence
-    const sentence = `Expect ${startPhrase} with ${precipPhrase}. ${tempPhrase}. ${windPhrase}.`;
-
-    // Insert into DOM
-    const el = document.getElementById('textForecast');
-    if (el) el.textContent = sentence;
-    return sentence;
-
-  } catch (err) {
-    console.error('Text forecast error', err);
-    const el = document.getElementById('textForecast');
-    if (el) el.textContent = 'Forecast unavailable';
-    return null;
-  }
-}
-
-// call after DOMContentLoaded or at end of your boot sequence
-document.addEventListener('DOMContentLoaded', () => {
-  generateTextForecast();
-  // Optional: refresh text every 30 minutes
-  setInterval(generateTextForecast, 30*60*1000);
-});
-
-    // Boot: fetch now and every 5 minutes
     document.addEventListener('DOMContentLoaded', () => {
-     
-      const bW = document.getElementById('btnWindy');
-      const bO = document.getElementById('btnOpenMeteo');
-      if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
-      if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
+      // Run once on boot then every 5 minutes
+      fetchAndRenderWeather();
+      setInterval(fetchAndRenderWeather, 300000);
+    });
+  </script>
 
+  <!-- Glider advice helper -->
+  <script>
+    function recommendGliderFromWind(w) {
+      if (w === null || w === undefined || isNaN(Number(w))) return "No wind data available";
+      const wnum = Number(w);
+      if (wnum < 5) return "Powered glider or floater";
+      if (wnum >= 5 && wnum < 10) return "Power glider or large wing span glider";
+      if (wnum >= 10 && wnum < 20) return "Normal to strong wind glider";
+      if (wnum >= 20 && wnum < 30) return "Extreme glider";
+      return "Stay in bed...!";
+    }
+
+    window.updateGliderAdvice = function(w) {
+      const elAdvice = document.getElementById('gliderAdvice');
+      if (!elAdvice) return;
+      elAdvice.textContent = recommendGliderFromWind(w);
+    };
+
+    // Observe windSpeed element to keep advice in sync (fallback)
+    document.addEventListener('DOMContentLoaded', () => {
+      const windSpeedNode = document.getElementById('windSpeed');
+      if (!windSpeedNode) return;
+      const initMatch = windSpeedNode.textContent.match(/(\d+)/);
+      if (initMatch) window.updateGliderAdvice(Number(initMatch[1]));
+      const observer = new MutationObserver(() => {
+        const m = windSpeedNode.textContent.match(/(\d+)/);
+        window.updateGliderAdvice(m ? Number(m[1]) : null);
+      });
+      observer.observe(windSpeedNode, { childList: true, subtree: true, characterData: true });
     });
   </script>
 </body>
