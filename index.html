@@ -470,6 +470,9 @@
             humEl.textContent = `--`;
             humEl.title = `Humidity data unavailable`;
           }
+          // after building hourly and updating DOM
+            generateTextForecast(hourly);
+
         })();
 
         // Wind speed / gusts / direction
