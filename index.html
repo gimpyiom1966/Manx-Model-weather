@@ -70,13 +70,17 @@
       display: block;
       pointer-events: none;
       } 
-    @keyframes spin-dynamic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spin-dynamic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .weather-spin {
   animation-name: spin-dynamic;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   animation-duration: var(--weather-spin-duration, 2s);
+  transform-origin: 50% 50%;
+  display: inline-block;
   transition: animation-duration 0.5s ease;
+}
+
 }
 
   </style>
