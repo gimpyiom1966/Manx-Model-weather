@@ -227,20 +227,17 @@
       } catch (e) { console.warn('Leaflet init failed:', e); }
     }
 
-    // Compass rotation (dial + needle), needle width set in CSS
+
     function applyCompassRotation(windDeg) {
-      if (windDeg === null || windDeg === undefined) return;
-      const n = Number(windDeg);
-      if (isNaN(n)) return;
-      const raw = ((n % 360) + 360) % 360;
-      const dial = document.querySelector('.compass-dial');
-      if (dial) dial.style.transform = `rotate(${raw}deg)`;
-      const needleImg = document.getElementById('compassNeedleImg');
-      if (needleImg) {
-        const CORRECTION = 180; // adjust to 0/90/180 if needed for image native orientation
-        needleImg.style.transform = `rotate(${(raw + CORRECTION) % 360}deg)`;
-      }
-    }
+  if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
+  const angle = ((windDeg % 360) + 360) % 360;
+  // rotate the needle image so its nose points to the wind bearing
+  const needleImg = document.getElementById('compassNeedleImg');
+  if (needleImg) needleImg.style.transform = `rotate(${angle}deg)`;
+  // keep dial static (or optionally update dial CSS var if you want combined effects)
+  const dial = document.querySelector('.compass-dial');
+  if (dial) dial.style.setProperty('--wind-direction', `0deg`);
+}
 
     // Basic markers, embeds, photos
     const markers = {
