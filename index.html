@@ -517,8 +517,8 @@
 
         // Updated timestamp
         if (el('updated')) {
-          const stamp = (hourly && hourly.time && hourly.time[0]) ? new Date(hourly.time[0]) : new Date();
-          el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
+        const stamp = current && current.time ? new Date(current.time) : (hourly && hourly.time ? new Date(hourly.time[0]) : new Date());
+          uEl.textContent = `Last update: ${stamp.toLocaleString()}`;
         }
         // ensure text forecast uses the fresh hourly payload
         //generateTextForecast();
