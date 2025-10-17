@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pauls Model Glider flying Site Guide!! - Isle of Man Weather</title>
+  <title>Pauls Model Glider flying Site - Isle of Man Weather</title>
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -84,7 +84,7 @@
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary text-3xl">waves</span>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Pauls Model Glider flying Site Guide</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Pauls Model Glider flying Site Guide!!</h1>
           </div>
         </div>
       </div>
@@ -479,7 +479,7 @@
         if (el('windDirDegrees') && windDirDeg !== null) el('windDirDegrees').textContent = `Direction: ${Math.round(windDirDeg)}°`;
         const windDirLabel = degToCardinal(windDirDeg);
         if (el('windDirLabel')) el('windDirLabel').textContent = `Wind From: ${windDirLabel}`;
-
+       
         // Forecast strip cards (next 12 hours)
         const fStrip = el('forecastStrip');
         if (fStrip && hourly && hourly.time) {
@@ -518,6 +518,8 @@
           const stamp = (hourly && hourly.time && hourly.time[0]) ? new Date(hourly.time[0]) : new Date();
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
+        // ensure text forecast uses the fresh hourly payload
+        generateTextForecast();
       } catch (err) {
         console.error('Open-Meteo fetch error', err);
         if (el('updated')) el('updated').textContent = 'Unable to load weather';
