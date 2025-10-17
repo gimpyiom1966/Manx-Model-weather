@@ -521,7 +521,7 @@
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
         // ensure text forecast uses the fresh hourly payload
-        generateTextForecast();
+        //generateTextForecast();
       } catch (err) {
         console.error('Open-Meteo fetch error', err);
         if (el('updated')) el('updated').textContent = 'Unable to load weather';
@@ -546,6 +546,37 @@
       if (wnum >= 20 && wnum < 30) return "Extreme glider";
       return "Stay in bed...!";
     }
+function generateTextForecast(hourly) {
+  if (!hourly || !hourly.time) {
+    document.getElementById('textForecast').textContent = 'Forecast unavailable';
+    return;
+  }
+  const now = Date.now();
+  const next24 = [];
+  for (let i = 0; i < hourly.time.length && next24.length < 24; i++) {
+    const t = Date.parse(hourly.time[i]);
+    if (t > now) next24.push({
+      time: new Date(t),
+      temp: hourly.temperature_2m?.[i] ?? null,
+      precip: hourly.precipitation?.[i] ?? 0,
+      code: hourly.weathercode?.[i] ?? null,
+      wind: hourly.wind_speed_10m?.[i] ?? null
+    });
+  }
+  if (!next24.length) {
+    document.getElementById('textForecast').textContent = 'Forecast unavailable';
+    return;
+  }
+  const totalPrecip = next24.reduce((s,h)=>s+(h.precip||0),0);
+  const maxTemp = Math.max(...next24.map(h=>h.temp||-999));
+  const minTemp = Math.min(...next24.map(h=>h.temp||999));
+  const avgWind = Math.round(next24.reduce((s,h)=>s+(h.wind||0),0)/next24.length);
+  let precipPhrase = 'no significant precipitation expected';
+  if (totalPrecip >= 5) precipPhrase = 'rain likely';
+  else if (totalPrecip > 0.5) precipPhrase = 'a chance of light showers';
+  const text = `Expect ${precipPhrase}. Temperatures about ${Math.round((maxTemp+minTemp)/2)}°C. Winds around ${avgWind} mph.`;
+  document.getElementById('textForecast').textContent = text;
+}
 
     window.updateGliderAdvice = function(w) {
       const elAdvice = document.getElementById('gliderAdvice');
