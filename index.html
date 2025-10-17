@@ -517,61 +517,102 @@ function applyCompassRotation(windDeg) {
       }
     }
 
-    async function fetchAndUpdateWeather() {
-      try {
-        const res = await fetch(apiUrl);
-        if (!res.ok) throw new Error(`Open-Meteo request failed: ${res.status}`);
-        const data = await res.json();
+// --- Unified fetch + render (replace other weather fetch blocks) ---
+async function fetchAndRenderWeather() {
+  const vars = ['temperature_2m','relative_humidity_2m','wind_speed_10m','wind_direction_10m','wind_gusts_10m','precipitation','weathercode'];
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=${vars.join(',')}&timezone=auto&forecast_days=2`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Open-Meteo request failed: ' + res.status);
+    const data = await res.json();
+    const hourly = data.hourly || null;
+    function pickHourlyNearest(variable) {
+      if (!hourly || !hourly.time) return null;
+      const times = hourly.time; const now = Date.now();
+      let nearestIdx = 0, nearestDiff = Infinity;
+      for (let i=0;i<times.length;i++){
+        const t = Date.parse(times[i]); const diff = Math.abs(t - now);
+        if (diff < nearestDiff) { nearestDiff = diff; nearestIdx = i; }
+      }
+      return hourly[variable] && hourly[variable].length > nearestIdx ? hourly[variable][nearestIdx] : null;
+    }
 
-        const current = data.current || null;
-        const hourly = data.hourly || null;
+    const temp = pickHourlyNearest('temperature_2m');
+    const windSpeed = pickHourlyNearest('wind_speed_10m');
+    const windDirDeg = pickHourlyNearest('wind_direction_10m');
+    const rawHumidity = pickHourlyNearest('relative_humidity_2m');
+    const windGust = pickHourlyNearest('wind_gusts_10m') ?? null;
 
-        function pickHourlyNearest(variable) {
-          if (!hourly || !hourly.time) return null;
-          const times = hourly.time;
-          const now = Date.now();
-          let nearestIdx = 0;
-          let nearestDiff = Infinity;
-          for (let i = 0; i < times.length; i++) {
-            const t = Date.parse(times[i]);
-            const diff = Math.abs(t - now);
-            if (diff < nearestDiff) { nearestDiff = diff; nearestIdx = i; }
-          }
-          return hourly[variable] && hourly[variable].length > nearestIdx ? hourly[variable][nearestIdx] : null;
-        }
-        // Diagnostic: inspect remote payload and resolved humidity
-          console.log('weather payload', data);
-          const rawHumidity = (current && (current.relative_humidity_2m ?? current.humidity)) ?? null;
-          console.log('rawHumidity candidates -> current.relative_humidity_2m / current.humidity:', rawHumidity);
+    // Temperature
+    if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
 
-        const temp = current && typeof current.temperature_2m === 'number' ? current.temperature_2m : pickHourlyNearest('temperature_2m');
-        const humidity = current && typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : pickHourlyNearest('relative_humidity_2m');
-        const windSpeed = current && typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : pickHourlyNearest('wind_speed_10m');
-        const windDirDeg = current && typeof current.wind_direction_10m === 'number' ? current.wind_direction_10m : pickHourlyNearest('wind_direction_10m');
-     
-      // Map wind speed (mph) to animation duration (seconds).
-      // Higher wind -> faster spin (shorter duration). Adjust min/max as needed.
-        function spinDurationForWindSpeed(mph) {
-        if (mph === null || mph === undefined || isNaN(Number(mph))) return 2; // default
-        const v = Number(mph);
-        const MIN_DUR = 0.35; // fastest (high wind)
-        const MAX_DUR = 3.5;  // slowest (calm)
-        // Invert wind speed into a 0..1 range using a damping curve
-        const normalized = Math.min(1, v / 40); // 40 mph saturates to fastest
-        const t = MAX_DUR - normalized * (MAX_DUR - MIN_DUR);
-        return Math.max(MIN_DUR, Math.min(MAX_DUR, t));
-        }
+    // Humidity (cleaned single block)
+    (function updateHumidityDisplay() {
+      const raw = rawHumidity;
+      const humEl = el('humidity'); if (!humEl) return;
+      if (raw !== null && !isNaN(Number(raw))) {
+        const resolved = Math.max(0, Math.min(100, Math.round(Number(raw))));
+        humEl.textContent = `${resolved}%`;
+        humEl.title = `Open‑Meteo hourly humidity: ${raw}`;
+      } else {
+        humEl.textContent = `--`;
+        humEl.title = `Humidity data unavailable`;
+      }
+    })();
 
-// Call this each time wind speed is updated
-function updateWeatherIconSpin(mph) {
-  const dur = spinDurationForWindSpeed(mph);
-  // Apply to root or a container; targeting :root makes it simple for multiple icons
-  document.documentElement.style.setProperty('--weather-spin-duration', `${dur}s`);
-  // Ensure icon(s) have class 'weather-spin'
-  document.querySelectorAll('.material-symbols-outlined.weather-spin, .weather-spin').forEach(el => {
-    if (!el.classList.contains('weather-spin')) el.classList.add('weather-spin');
-  });
+    // Wind speed / gusts / direction
+    if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
+    if (el('windGust')) {
+      if (windGust !== null) { el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`; el('windGust').classList.remove('opacity-50'); }
+      else { el('windGust').textContent = `Gusts: N/A`; el('windGust').classList.add('opacity-50'); }
+    }
+    if (el('windDirDegrees') && windDirDeg !== null) el('windDirDegrees').textContent = `Direction: ${Math.round(windDirDeg)}°`;
+    const windDirLabel = degToCardinal(windDirDeg);
+    if (el('windDirLabel')) el('windDirLabel').textContent = `Wind From: ${windDirLabel}`;
+
+    // Forecast strip (next 12 hours)
+    const fStrip = el('forecastStrip');
+    if (fStrip && hourly && hourly.time) {
+      const now = Date.now(); const hrs = [];
+      for (let i=0;i<hourly.time.length && hrs.length<12;i++){
+        const t = Date.parse(hourly.time[i]);
+        if (t > now) hrs.push({ time: new Date(t), speed: hourly.wind_speed_10m[i], dirDeg: hourly.wind_direction_10m[i] });
+      }
+      fStrip.innerHTML = hrs.map(h => {
+        const hour = h.time.getHours().toString().padStart(2,'0');
+        const lbl = degToCardinal(h.dirDeg);
+        return `<div class="bg-background-light dark:bg-background-dark p-3 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 text-center">
+          <p class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark">${hour}:00</p>
+          <span class="material-symbols-outlined text-primary text-2xl weather-spin">air</span>
+          <p class="font-bold text-gray-900 dark:text-white">${Math.round(h.speed||0)} mph</p>
+          <p class="text-sm text-text-muted-light dark:text-text-muted-dark">${lbl}</p>
+        </div>`;
+      }).join('');
+    }
+
+    // Apply compass and map
+    applyCompassRotation(windDirDeg);
+    updateMapAndStreetView(normalizeCardinal(windDirLabel));
+
+    // Dynamic spin + glider advice
+    const numericWind = (typeof windSpeed === 'number') ? windSpeed : (parseInt(el('windSpeed')?.textContent || '') || null);
+    updateWeatherIconSpin(numericWind);
+    if (typeof window.updateGliderAdvice === 'function') window.updateGliderAdvice(numericWind);
+
+    // Updated timestamp
+    if (el('updated')) {
+      const stamp = (hourly && hourly.time && hourly.time[0]) ? new Date(hourly.time[0]) : new Date();
+      el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
+    }
+  } catch (err) {
+    console.error('Open‑Meteo fetch error', err);
+    if (el('updated')) el('updated').textContent = 'Unable to load weather';
+  }
 }
+// call it (on boot or interval)
+fetchAndRenderWeather();
+setInterval(fetchAndRenderWeather, 300000);
+// --- end unified fetch ---
 
 
 
@@ -813,8 +854,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (bW) bW.addEventListener('click', () => setActiveRadar('windy'));
       if (bO) bO.addEventListener('click', () => setActiveRadar('openmeteo'));
 
-      fetchAndUpdateWeather();
-      setInterval(fetchAndUpdateWeather, 300000);
+      //fetchAndUpdateWeather();
+     // setInterval(fetchAndUpdateWeather, 300000);
     });
   </script>
 </body>
