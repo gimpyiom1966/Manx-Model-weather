@@ -1,1 +1,69 @@
+name: Build Tailwind and Deploy site
 
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run npm build if package.json exists
+        id: npm_build
+        run: |
+          if [ -f package.json ]; then
+            echo "package.json found — installing and running npm build"
+            npm ci
+            if npm run | sed -n '1,200p' | grep -q "build:css"; then
+              npm run build:css
+            elif npm run | sed -n '1,200p' | grep -q "build"; then
+              npm run build
+            else
+              echo "No build script detected; skipping npm build"
+            fi
+            echo "npm_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "package.json not found — skipping npm build"
+            echo "npm_build=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Try Tailwind CLI fallback build if src/input.css exists
+        if: steps.npm_build.outputs.npm_build == 'false'
+        run: |
+          if [ -f src/input.css ]; then
+            echo "src/input.css found — installing tailwindcss CLI and building dist/styles.css"
+            npm init -y
+            npm install -D tailwindcss@latest postcss autoprefixer
+            npx tailwindcss -i ./src/input.css -o ./dist/styles.css --minify
+          else
+            echo "No src/input.css found — skipping fallback Tailwind build"
+          fi
+
+      - name: List repo files (debug)
+        run: |
+          echo "Repository root files:"
+          ls -la
+          echo "dist folder contents (if exists):"
+          ls -la dist || true
+
+      - name: Deploy to GitHub Pages (gh-pages)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          # if you prefer to publish only ./dist, change publish_dir to ./dist
