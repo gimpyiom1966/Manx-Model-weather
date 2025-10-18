@@ -1,0 +1,4 @@
+"scripts": {
+  "build:css": "tailwindcss -i ./src/input.css -o ./dist/styles.css --minify",
+  "dev:css": "tailwindcss -i ./src/input.css -o ./dist/styles.css --watch"
+}
