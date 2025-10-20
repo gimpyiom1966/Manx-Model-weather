@@ -1,0 +1,12 @@
+{
+  "name": "manx-model-weather",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npx tailwindcss build src/styles.css -o dist/styles.css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.3",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}
