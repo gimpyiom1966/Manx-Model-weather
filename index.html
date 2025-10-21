@@ -386,6 +386,7 @@
       return dirs[idx];
     }
 
+    // Map wind speed to spin duration
     function spinDurationForWindSpeed(mph) {
       if (mph === null || mph === undefined || isNaN(Number(mph))) return 2;
       const v = Math.max(0, Math.min(40, Number(mph)));
@@ -393,7 +394,6 @@
       const t = MAX_DUR - (v / 40) * (MAX_DUR - MIN_DUR);
       return Math.max(MIN_DUR, Math.min(MAX_DUR, t));
     }
-
     function updateWeatherIconSpin(mph) {
       const dur = spinDurationForWindSpeed(mph);
       document.documentElement.style.setProperty('--weather-spin-duration', `${dur}s`);
@@ -428,8 +428,10 @@
         const rawHumidity = pickHourlyNearest('relative_humidity_2m');
         const windGust = pickHourlyNearest('wind_gusts_10m') ?? null;
 
+        // Temperature
         if (el('temp') && temp !== null) el('temp').textContent = `${Math.round(temp)}°C`;
 
+        // Clean humidity block
         (function updateHumidityDisplay() {
           const raw = rawHumidity;
           const humEl = el('humidity'); if (!humEl) return;
@@ -441,8 +443,12 @@
             humEl.textContent = `--`;
             humEl.title = `Humidity data unavailable`;
           }
+          // after building hourly and updating DOM
+            generateTextForecast(hourly);
+
         })();
 
+        // Wind speed / gusts / direction
         if (el('windSpeed') && windSpeed !== null) el('windSpeed').innerHTML = `${Math.round(windSpeed)} <span class="text-xl font-normal">mph</span>`;
         if (el('windGust')) {
           if (windGust !== null) { el('windGust').textContent = `Gusts: ${Math.round(windGust)} mph`; el('windGust').classList.remove('opacity-50'); }
@@ -451,7 +457,8 @@
         if (el('windDirDegrees') && windDirDeg !== null) el('windDirDegrees').textContent = `Direction: ${Math.round(windDirDeg)}°`;
         const windDirLabel = degToCardinal(windDirDeg);
         if (el('windDirLabel')) el('windDirLabel').textContent = `Wind From: ${windDirLabel}`;
-
+       
+        // Forecast strip cards (next 12 hours)
         const fStrip = el('forecastStrip');
         if (fStrip && hourly && hourly.time) {
           const now = Date.now(); const hrs = [];
@@ -473,51 +480,99 @@
           }).join('');
         }
 
+        // Apply compass and map
         applyCompassRotation(windDirDeg);
-        const siteKey = (degToCardinal(windDirDeg) || 'NW');
+        const siteKey = normalizeCardinal(degToCardinal(windDirDeg));
+        updateMapAndStreetView(siteKey);
 
+        // Glider advice and dynamic spin update
         const numericWind = (typeof windSpeed === 'number') ? windSpeed : (parseInt(el('windSpeed')?.textContent || '') || null);
         window.latestWindSpeed = numericWind;
         updateWeatherIconSpin(numericWind);
         if (typeof window.updateGliderAdvice === 'function') window.updateGliderAdvice(numericWind);
 
+        // Updated timestamp
         if (el('updated')) {
           const stamp = (hourly && hourly.time && hourly.time[0]) ? new Date(hourly.time[0]) : new Date();
           el('updated').textContent = `Last update: ${stamp.toLocaleString()}`;
         }
-
-        // Optional: call generateTextForecast(hourly) if you add that function
+        // ensure text forecast uses the fresh hourly payload
+        //generateTextForecast();
       } catch (err) {
         console.error('Open-Meteo fetch error', err);
-        const updatedEl = el('updated');
-        if (updatedEl) {
-          const prev = updatedEl.dataset && updatedEl.dataset.lastSuccess ? new Date(updatedEl.dataset.lastSuccess) : null;
-          if (prev) updatedEl.textContent = `Last update: ${prev.toLocaleString()} (offline)`;
-          else updatedEl.textContent = 'Last update: unavailable';
-          updatedEl.classList.add('text-red-600');
-        }
+        if (el('updated')) el('updated').textContent = 'Unable to load weather';
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Run once on boot then every 5 minutes
       fetchAndRenderWeather();
       setInterval(fetchAndRenderWeather, 300000);
+    });
+  </script>
 
-      const bW = el('btnWindy'), bO = el('btnOpenMeteo');
-      if (bW) bW.addEventListener('click', () => {
-        const radarFrame = el('weatherRadarIframe');
-        if (radarFrame && radarFrame.dataset && radarFrame.dataset.src) {
-          radarFrame.src = radarFrame.dataset.src;
-          radarFrame.setAttribute('data-src-loaded', 'true');
-        }
-        bW.classList.add('toggle-active'); bW.classList.remove('toggle-inactive');
-        bO.classList.remove('toggle-active'); bO.classList.add('toggle-inactive');
+  <!-- Glider advice helper -->
+  <script>
+    function recommendGliderFromWind(w) {
+      if (w === null || w === undefined || isNaN(Number(w))) return "No wind data available";
+      const wnum = Number(w);
+      if (wnum < 5) return "Powered glider or floater";
+      if (wnum >= 5 && wnum < 10) return "Power glider or large wing span glider";
+      if (wnum >= 10 && wnum < 20) return "Normal to strong wind glider";
+      if (wnum >= 20 && wnum < 30) return "Extreme glider";
+      return "Stay in bed...!";
+    }
+function generateTextForecast(hourly) {
+  if (!hourly || !hourly.time) {
+    document.getElementById('textForecast').textContent = 'Forecast unavailable';
+    return;
+  }
+  const now = Date.now();
+  const next24 = [];
+  for (let i = 0; i < hourly.time.length && next24.length < 24; i++) {
+    const t = Date.parse(hourly.time[i]);
+    if (t > now) next24.push({
+      time: new Date(t),
+      temp: hourly.temperature_2m?.[i] ?? null,
+      precip: hourly.precipitation?.[i] ?? 0,
+      code: hourly.weathercode?.[i] ?? null,
+      wind: hourly.wind_speed_10m?.[i] ?? null
+    });
+  }
+  if (!next24.length) {
+    document.getElementById('textForecast').textContent = 'Forecast unavailable';
+    return;
+  }
+  const totalPrecip = next24.reduce((s,h)=>s+(h.precip||0),0);
+  const maxTemp = Math.max(...next24.map(h=>h.temp||-999));
+  const minTemp = Math.min(...next24.map(h=>h.temp||999));
+  const avgWind = Math.round(next24.reduce((s,h)=>s+(h.wind||0),0)/next24.length);
+  let precipPhrase = 'no significant precipitation expected';
+  if (totalPrecip >= 5) precipPhrase = 'rain likely';
+  else if (totalPrecip > 0.5) precipPhrase = 'a chance of light showers';
+  const text = `Expect ${precipPhrase}. Temperatures about ${Math.round((maxTemp+minTemp)/2)}°C. Winds around ${avgWind} mph.`;
+  document.getElementById('textForecast').textContent = text;
+}
+
+    window.updateGliderAdvice = function(w) {
+      const elAdvice = document.getElementById('gliderAdvice');
+      if (!elAdvice) return;
+      elAdvice.textContent = recommendGliderFromWind(w);
+    };
+
+    // Observe windSpeed element to keep advice in sync (fallback)
+    document.addEventListener('DOMContentLoaded', () => {
+      const windSpeedNode = document.getElementById('windSpeed');
+      if (!windSpeedNode) return;
+      const initMatch = windSpeedNode.textContent.match(/(\d+)/);
+      if (initMatch) window.updateGliderAdvice(Number(initMatch[1]));
+      const observer = new MutationObserver(() => {
+        const m = windSpeedNode.textContent.match(/(\d+)/);
+        window.updateGliderAdvice(m ? Number(m[1]) : null);
       });
-      if (bO) bO.addEventListener('click', () => {
-        bO.classList.add('toggle-active'); bO.classList.remove('toggle-inactive');
-        if (bW) { bW.classList.remove('toggle-active'); bW.classList.add('toggle-inactive'); }
-      });
+      observer.observe(windSpeedNode, { childList: true, subtree: true, characterData: true });
     });
   </script>
 </body>
 </html>
+
