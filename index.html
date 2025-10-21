@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pauls Model Glider flying Site Guide - Isle of Man Weather</title>
+  <title>Pauls Model Glider flying Site - Isle of Man Weather</title>
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -11,6 +11,200 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+
+  <!-- Tailwind (dev CDN; replace with compiled CSS for production) -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#00A0A0",
+            "background-light": "#E0F7FA",
+            "background-dark": "#004D40",
+            "card-light": "#FFFFFF",
+            "card-dark": "#00796B",
+            "accent-red": "#E57373",
+            "text-light": "#006064",
+            "text-dark": "#B2EBF2",
+            "text-muted-light": "#4DB6AC",
+            "text-muted-dark": "#80CBC4",
+          },
+          fontFamily: { display: ["Space Grotesk"] },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* layout helpers */
+    #streetFrameWrapper { transition: opacity 300ms ease; opacity: 1; }
+    .fade-hidden { opacity: 0 !important; pointer-events: none; }
+    #streetFrameWrapper img.site-photo { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
+
+    /* compass needle */
+    #compassNeedleImg {
+      width: 96px; /* requested */
+      height: auto;
+      transform-origin: 50% 50%;
+      transform: rotate(0deg);
+      transition: transform 600ms ease;
+      display: block;
+      pointer-events: none;
+    }
+    .compass-dial { transition: transform 600ms ease; transform: rotate(0deg); }
+
+    /* dynamic weather icon spin (single definition) */
+    @keyframes spin-dynamic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .weather-spin {
+      animation-name: spin-dynamic;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-duration: var(--weather-spin-duration, 2s);
+      transform-origin: 50% 50%;
+      display: inline-block;
+      transition: animation-duration 0.5s ease;
+    }
+
+    .temp-change { animation: pulse 2s infinite alternate ease-in-out; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+    .embed-full { width: 100%; height: 100%; border: 0; display: block; }
+    .toggle-btn { padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+    .toggle-active { background-color: rgba(0,160,160,1); color: white; }
+    .toggle-inactive { background-color: rgba(0,0,0,0.06); color: inherit; }
+  </style>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+  <div class="flex flex-col min-h-screen">
+    <header class="bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-300 dark:border-gray-700">
+      <div class="container mx-auto px-2 sm:px-4 lg:px-6">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-3xl">waves</span>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Pauls Model Glider flying Site Guide!!</h1>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-2 sm:px-4 lg:px-6 py-6">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+          <section id="radar-section" class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-xl md:text-2xl font-bold text-primary text-center flex-1">Weather Radar</h2>
+              <div id="radarToggle" class="ml-3 flex gap-2">
+                <button id="btnWindy" class="toggle-btn toggle-inactive">Windy</button>
+                <button id="btnOpenMeteo" class="toggle-btn toggle-active">Open‑Meteo</button>
+              </div>
+            </div>
+            <div class="bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden h-[360px] md:h-[50vh]">
+              <iframe
+                id="weatherRadarIframe"
+                class="embed-full"
+                title="Weather radar"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                data-src="https://embed.windy.com/embed2.html?lat=54.236&lon=-4.548&zoom=8&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=mph&metricTemp=%C2%B0C&radarRange=-1"
+                src=""
+              ></iframe>
+            </div>
+          </section>
+
+          <section id="map-section" class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl md:text-2xl font-bold mb-3 text-primary text-center">Flying Site Map</h2>
+            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+              <div id="wind-map" style="height:420px; border-radius:12px;"></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="lg:col-span-3 space-y-6">
+          <section id="conditions-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <h2 class="text-2xl font-bold mb-4 text-primary text-center">Current Conditions: Isle of Man</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
+                <span class="material-symbols-outlined text-primary text-4xl mb-3 weather-spin">air</span>
+                <p class="text-sm text-text-muted-light dark:text-text-muted-dark">Wind Speed</p>
+                <p id="windSpeed" class="text-3xl font-bold text-gray-900 dark:text-white temp-change">-- <span class="text-xl font-normal">mph</span></p>
+                <p id="windGust" class="text-sm text-text-muted-light mt-1">Gusts: -- mph</p>
+                <p id="windDirDegrees" class="text-sm text-text-muted-light dark:text-text-muted-dark mt-1">Direction: --</p>
+              </div>
+
+              <div class="flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-5 rounded-lg text-center shadow-md border border-gray-300 dark:border-gray-600">
+                <div class="relative w-32 h-32">
+                  <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-pulse"></div>
+                  <div class="absolute inset-0 compass-dial flex items-center justify-center">
+                    <img id="compassNeedleImg" src="assets/glider-needle.png" alt="glider needle" />
+                  </div>
+                </div>
+                <p class="text-sm text-text-muted-light dark:text-text-muted-dark mt-3">Wind Direction</p>
+                <p id="windDirLabel" class="text-2xl font-bold text-gray-900 dark:text-white mt-2 min-h-[2.5rem] flex items-center justify-center">--</p>
+              </div>
+
+              <div class="space-y-4 bg-background-light dark:bg-background-dark p-5 rounded-lg shadow-md border border-gray-300 dark:border-gray-600 flex flex-col justify-center">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary">device_thermostat</span>
+                  <div>
+                    <p class="text-sm text-text-muted-light dark:text-text-muted-dark">Temperature</p>
+                    <p id="temp" class="font-bold text-gray-900 dark:text-white text-2xl temp-change">--°C</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary">humidity_percentage</span>
+                  <div>
+                    <p class="text-sm text-text-muted-light dark:text-text-muted-dark">Humidity</p>
+                    <p id="humidity" class="font-bold text-gray-900 dark:text-white text-2xl">--%</p>
+                  </div>
+                </div>
+                <p id="updated" class="text-xs text-text-muted-light dark:text-text-muted-dark mt-2">Last update: --</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="street-view" class="w-full bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <h2 id="streetLabel" class="text-2xl font-bold text-primary">Street View</h2>
+              <div class="flex items-center gap-3">
+                <button id="picturesBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-4 py-2 rounded-lg text-base font-semibold flex items-center gap-2" title="Show photos for this wind direction">
+                  <span class="material-symbols-outlined">photo_library</span> Pictures
+                </button>
+                <button id="altSiteBtn" class="toggle-btn bg-primary text-white hover:bg-primary/80 transition px-5 py-2 rounded-lg text-base font-semibold flex items-center gap-2" title="Cycle alternate views for this wind direction">
+                  <span class="material-symbols-outlined animate-spin-slow">refresh</span> Alt Site
+                </button>
+              </div>
+            </div>
+            <div id="streetFrameWrapper" class="rounded-lg overflow-hidden shadow-inner transition-opacity duration-500 opacity-100" style="height:420px;">
+              <iframe id="streetFrame" class="embed-full" title="Street View" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+          </section>
+
+          <section id="forecast-section" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-700">
+            <h2 class="text-2xl font-bold mb-4 text-primary text-center">Forecast</h2>
+
+            <div id="forecastStrip" class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
+
+            <div class="space-y-5 mt-6">
+              <div>
+                <h3 class="font-bold text-primary text-xl">Next 24 Hours</h3>
+                <p id="textForecast" class="text-text-light dark:text-text-dark leading-relaxed">Loading...</p>
+              </div>
+              <hr class="border-gray-300 dark:border-gray-600" />
+              <div>
+                <h3 class="font-bold text-primary text-xl">What Glider to Use</h3>
+                <p id="gliderAdvice" class="text-text-light dark:text-text-dark leading-relaxed font-semibold">Loading recommendation…</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
 
   <!-- Production CSS (built by CI into /dist/styles.css) -->
   <!-- <link rel="stylesheet" href="/dist/styles.css" /> -->
