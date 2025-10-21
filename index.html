@@ -10,21 +10,41 @@
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
   <!-- Production CSS (built by CI into /dist/styles.css) -->
   <!-- <link rel="stylesheet" href="/dist/styles.css" /> -->
    <link rel="stylesheet" href="/Manx-Model-weather/dist/styles.css">
   <!-- Fallback small runtime styles -->
   <style>
+    /* layout helpers */
     #streetFrameWrapper { transition: opacity 300ms ease; opacity: 1; }
     .fade-hidden { opacity: 0 !important; pointer-events: none; }
     #streetFrameWrapper img.site-photo { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
 
-    #compassNeedleImg { width: 96px; height: auto; transform-origin: 50% 50%; transform: rotate(0deg); transition: transform 600ms ease; display: block; pointer-events: none; }
+    /* compass needle */
+    #compassNeedleImg {
+      width: 96px; /* requested */
+      height: auto;
+      transform-origin: 50% 50%;
+      transform: rotate(0deg);
+      transition: transform 600ms ease;
+      display: block;
+      pointer-events: none;
+    }
     .compass-dial { transition: transform 600ms ease; transform: rotate(0deg); }
 
+    /* dynamic weather icon spin (single definition) */
     @keyframes spin-dynamic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .weather-spin { animation-name: spin-dynamic; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: var(--weather-spin-duration, 2s); transform-origin: 50% 50%; display: inline-block; transition: animation-duration 0.5s ease; }
+    .weather-spin {
+      animation-name: spin-dynamic;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-duration: var(--weather-spin-duration, 2s);
+      transform-origin: 50% 50%;
+      display: inline-block;
+      transition: animation-duration 0.5s ease;
+    }
 
     .temp-change { animation: pulse 2s infinite alternate ease-in-out; }
     @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
@@ -36,7 +56,7 @@
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
   <div class="flex flex-col min-h-screen">
@@ -188,24 +208,103 @@
 
     // Compass rotation (dial + needle)
     function applyCompassRotation(windDeg) {
-      if (windDeg === null || windDeg === undefined) return;
-      const n = Number(windDeg);
-      if (isNaN(n)) return;
-      const raw = ((n % 360) + 360) % 360;
-      const dial = document.querySelector('.compass-dial');
-      if (dial) dial.style.transform = `rotate(${raw}deg)`;
-      const needleImg = document.getElementById('compassNeedleImg');
-      if (needleImg) {
-        const CORRECTION = 180;
-        needleImg.style.transform = `rotate(${(raw + CORRECTION) % 360}deg)`;
+  if (typeof windDeg !== 'number' || isNaN(windDeg)) return;
+  const angle = ((windDeg % 360) + 360) % 360;
+  // rotate the needle image so its nose points to the wind bearing
+  const needleImg = document.getElementById('compassNeedleImg');
+  if (needleImg) needleImg.style.transform = `rotate(${angle}deg)`;
+  // keep dial static (or optionally update dial CSS var if you want combined effects)
+  const dial = document.querySelector('.compass-dial');
+  if (dial) dial.style.setProperty('--wind-direction', `0deg`);
+}
+      // Basic markers, embeds, photos
+    const markers = {
+      N: [ { lat: 54.24, lng: -4.48, label: 'B10 - Peat' }, { lat: 54.297, lng: -4.40, label: "A18 Guthrie's" } ],
+      NE: [ { lat: 54.23, lng: -4.46, label: 'Windy Corner' } ],
+      E: [ { lat: 54.26, lng: -4.45, label: 'Verandah' } ],
+      SE: [ { lat: 54.12, lng: -4.73, label: 'Sloth Road' } ],
+      S: [ { lat: 54.24, lng: -4.51, label: 'Sheep Pens' } ],
+      SW: [ { lat: 54.25, lng: -4.47, label: 'Beinn-y-Phott' } ],
+      W: [ { lat: 54.12, lng: -4.73, label: 'Stacks' }, { lat: 54.24, lng: -4.54, label: 'Slue maggle' } ],
+      NW: [ { lat: 54.233703, lng: -4.658244, label: 'White Strand' }, { lat: 54.245554, lng: -4.498349, label: 'Stone Bridge' } ]
+    };
+
+    const streetViewEmbeds = {
+      N: ["https://www.google.com/maps/embed?pb=!4v1759611678150!6m8!1m7!1sIQTG0Pa9ReCacyLo5_TcgA!2m2!1d54.24866017637177!2d-4.48290157491008!3f351.32!4f-7.54!5f0.7820865974627469"],
+      NE: ["https://www.google.com/maps/embed?pb=!4v1759577130283!6m8!1m7!1s-oN4uJcb7DiLvDI7GEosGw!2m2!1d54.23089143243511!2d-4.467826868550862!3f67.26!4f0.46!5f0.7820865974627469"],
+      E: ["https://www.google.com/maps/embed?pb=!4v1759611786609!6m8!1m7!1sbG53IkAipWdCf4dkNqd1tQ!2m2!1d54.26153893287729!2d-4.450440591739061!3f132.94!4f-2.03!5f0.7820865974627469"],
+      SE: ["https://www.google.com/maps/embed?pb=!4v1759685432804!6m8!1m7!1sNamfBo838uoWJ_TwMy-1ug!2m2!1d54.12857133898845!2d-4.71955846361662!3f166.34!4f-1.47!5f0.7820865974627469"],
+      S: ["https://www.google.com/maps/embed?pb=!4v1759685594129!6m8!1m7!1seKuM02Aj5Qakex_59CwfmA!2m2!1d54.2448820602774!2d-4.517262771085067!3f176.12!4f-7.75!5f0.7820865974627469"],
+      SW: ["https://www.google.com/maps/embed?pb=!4v1759610256437!6m8!1m7!1s_CCHy4BkcWV8j_1xp-780A!2m2!1d54.24343527115033!2d-4.473254677072882!3f221.63!4f-1.10!5f0.400000000000000"],
+      W: ["https://www.google.com/maps/embed?pb=!4v1759922941173!6m8!1m7!1skNyeKUX6lwxW80sKguEnKg!2m2!1d54.12521659471083!2d-4.730623174153571!3f284.8373448827164!4f0.8266827177191516!5f0.7820865974627469"],
+      NW: ["https://www.google.com/maps/embed?pb=!4v1760124117236!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJRE94S3VwN0FF!2m2!1d54.23370346113064!2d-4.658243884271213!3f272.0339775179602!4f-13.718213270304986!5f0.7820865974627469"]
+    };
+
+    const sitePhotos = {
+      N: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/N-site-1.png"],
+      NE: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NE-site-1.png"],
+      E: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/E-site-1.png"],
+      SE: [], S: [], SW: [],
+      W: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/W-site-1.png"],
+      NW: ["https://raw.githubusercontent.com/gimpyiom1966/Manx-Model-weather/main/NW-site-1.png"]
+    };
+   const embedIndexTracker = { N:0, NE:0, E:0, SE:0, S:0, SW:0, W:0, NW:0 };
+    let streetViewMode = 'street';
+    
+      function normalizeCardinal(label) {
+      const map = { N:'N', NNE:'N', NNW:'N', NE:'NE', ENE:'NE', E:'E', ESE:'E', SE:'SE', SSE:'SE', S:'S', SSW:'S', SW:'SW', WSW:'SW', W:'W', WNW:'W', NW:'NW' };
+      return map[label] || label;
+    }
+        function setStreetViewContent({ type = 'iframe', src = '', index = 0, total = 1 } = {}) {
+      const wrapper = el('streetFrameWrapper');
+      if (!wrapper) return;
+      wrapper.classList.add('fade-hidden');
+      setTimeout(() => {
+        wrapper.innerHTML = '';
+        if (type === 'iframe') {
+          const iframe = document.createElement('iframe');
+          iframe.id = 'streetFrame';
+          iframe.className = 'embed-full';
+          iframe.title = 'Street View';
+          iframe.loading = 'lazy';
+          iframe.referrerPolicy = 'no-referrer-when-downgrade';
+          iframe.src = src || '';
+          wrapper.appendChild(iframe);
+        } else {
+          const img = document.createElement('img');
+          img.className = 'site-photo';
+          img.alt = `Site photo ${index + 1} of ${total}`;
+          img.src = src || '';
+          wrapper.appendChild(img);
+        }
+        wrapper.classList.remove('fade-hidden');
+      }, 220);
+    }
+ function updateMapAndStreetView(cardinal) {
+      if (!cardinal) return;
+      const key = normalizeCardinal(cardinal);
+      const embeds = streetViewEmbeds[key] || [];
+      const photos = sitePhotos[key] || [];
+      const index = embedIndexTracker[key] || 0;
+
+      if (streetViewMode === 'pictures' && photos.length) {
+        setStreetViewContent({ type: 'img', src: photos[index % photos.length], index, total: photos.length });
+        if (el('streetLabel')) el('streetLabel').textContent = `Pictures: ${markers[key]?.[index]?.label || key} (${(index % photos.length) + 1}/${photos.length})`;
+      } else {
+        setStreetViewContent({ type: 'iframe', src: embeds.length ? embeds[index % embeds.length] : '', index, total: embeds.length || 1 });
+        if (el('streetLabel')) el('streetLabel').textContent = `Street View: ${markers[key]?.[index]?.label || key} (${(index % (embeds.length || 1)) + 1}/${embeds.length || 1})`;
+      }
+
+      const m = markers[key]?.[index];
+      if (m && typeof window._windMapInstance !== 'undefined') {
+        try { if (window._liveWindMarker) window._liveWindMarker.remove(); } catch (e) {}
+        try {
+          window._liveWindMarker = L.marker([m.lat, m.lng]).addTo(window._windMapInstance).bindPopup(m.label).openPopup();
+          window._windMapInstance.setView([m.lat, m.lng], 12, { animate: true });
+        } catch (e) { console.warn('Map update failed:', e); }
       }
     }
 
-    // Minimal placeholders for functions referenced elsewhere in scripts to avoid ReferenceError
-    window.updateGliderAdvice = window.updateGliderAdvice || function() {};
-    window.updateWeatherIconSpin = window.updateWeatherIconSpin || function() {};
-
-    // Basic initial street view fallback
     (function ensureInitialStreetView() {
       const wrapper = el('streetFrameWrapper');
       if (!wrapper) return;
@@ -220,6 +319,60 @@
         wrapper.appendChild(iframe);
       }
     })();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const bW = el('btnWindy'), bO = el('btnOpenMeteo');
+      if (bW) bW.addEventListener('click', () => {
+        const radarFrame = el('weatherRadarIframe');
+        if (radarFrame && radarFrame.dataset && radarFrame.dataset.src) {
+          radarFrame.src = radarFrame.dataset.src;
+          radarFrame.setAttribute('data-src-loaded', 'true');
+        }
+        bW.classList.add('toggle-active'); bW.classList.remove('toggle-inactive');
+        bO.classList.remove('toggle-active'); bO.classList.add('toggle-inactive');
+      });
+      if (bO) bO.addEventListener('click', () => {
+        bO.classList.add('toggle-active'); bO.classList.remove('toggle-inactive');
+        if (bW) { bW.classList.remove('toggle-active'); bW.classList.add('toggle-inactive'); }
+      });
+
+      const picsBtn = el('picturesBtn');
+      if (picsBtn) {
+        function renderPicsBtn() {
+          const icon = document.createElement('span');
+          icon.className = 'material-symbols-outlined';
+          icon.textContent = (streetViewMode === 'pictures') ? 'tour' : 'photo_library';
+          while (picsBtn.firstChild) picsBtn.removeChild(picsBtn.firstChild);
+          picsBtn.appendChild(icon);
+          picsBtn.appendChild(document.createTextNode(streetViewMode === 'pictures' ? ' Street View' : ' Pictures'));
+        }
+        renderPicsBtn();
+        picsBtn.addEventListener('click', () => {
+          streetViewMode = (streetViewMode === 'pictures') ? 'street' : 'pictures';
+          renderPicsBtn();
+          const lbl = el('windDirLabel')?.textContent || '';
+          const currentDir = normalizeCardinal(lbl.split(': ')[1]) || 'NW';
+          updateMapAndStreetView(currentDir);
+        });
+      }
+
+      const altBtn = el('altSiteBtn');
+      if (altBtn) altBtn.addEventListener('click', () => {
+        const lbl = el('windDirLabel')?.textContent || '';
+        const currentDir = normalizeCardinal(lbl.split(': ')[1]);
+        if (!currentDir) return;
+        const embeds = streetViewEmbeds[currentDir] || [];
+        const photos = sitePhotos[currentDir] || [];
+        const length = (streetViewMode === 'pictures' && photos.length) ? photos.length : (embeds.length || 0);
+        if (!length) return;
+        embedIndexTracker[currentDir] = (embedIndexTracker[currentDir] + 1) % length;
+        updateMapAndStreetView(currentDir);
+      });
+
+      // initial street view fallback
+      updateMapAndStreetView('NW');
+    });
+
   </script>
 
   <!-- Weather: Open-Meteo unified fetch + render -->
